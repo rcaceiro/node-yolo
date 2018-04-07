@@ -1,6 +1,12 @@
 #ifndef LIBYOLO_H
 #define LIBYOLO_H
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include "darknet.h"
+#include "./darknet/src/option_list.h"
 #include "./darknet/src/image.h"
 
 typedef void *yolo_handle;

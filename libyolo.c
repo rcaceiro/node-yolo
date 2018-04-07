@@ -1,8 +1,3 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include "option_list.h"
 #include "libyolo.h"
 
 typedef struct
