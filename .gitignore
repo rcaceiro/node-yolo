@@ -30,3 +30,17 @@
 *.exe
 *.out
 *.app
+
+# Cmake
+cmake-build-debug/
+
+# Clion
+CMakeLists.txt
+.idea/
+
+#libyolo build folder
+obj/
+
+#NodeJS
+node_modules/
+package-lock.json
