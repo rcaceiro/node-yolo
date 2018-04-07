@@ -27,10 +27,10 @@ void get_detection_info(image im, int num, float thresh, box *boxes, float **pro
   {
    box b=boxes[i];
 
-   int left=(b.x-b.w/2.)*im.w;
-   int right=(b.x+b.w/2.)*im.w;
-   int top=(b.y-b.h/2.)*im.h;
-   int bot=(b.y+b.h/2.)*im.h;
+   int left=(int)(b.x-b.w/2.)*im.w;
+   int right=(int)(b.x+b.w/2.)*im.w;
+   int top=(int)(b.y-b.h/2.)*im.h;
+   int bot=(int)(b.y+b.h/2.)*im.h;
 
    if(left<0)
    {
