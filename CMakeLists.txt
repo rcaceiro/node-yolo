@@ -1,7 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
-PROJECT(NodeYoloJS C)
+PROJECT(NodeYoloJS)
 
-SET(CMAKE_C_STANDARD 11)
 SET(CMAKE_CXX_STANDARD 17)
 
 INCLUDE_DIRECTORIES(.)
@@ -10,4 +9,4 @@ INCLUDE_DIRECTORIES(darknet/include)
 
 ADD_EXECUTABLE(NodeYoloJS
 			libyolo.h
-			libyolo.c module.cpp)
+			libyolo.c module.cpp module.cpp module.h)
