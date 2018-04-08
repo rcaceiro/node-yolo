@@ -67,7 +67,6 @@ $(OBJDIR)%.o: %.cu $(DEPS)
 
 obj:
 	mkdir -p obj
-	mkdir -p lib
 
 .PHONY: clean
 

@@ -41,5 +41,6 @@ cmake-build-debug/
 obj/
 
 #NodeJS
+build/
 node_modules/
 package-lock.json
