@@ -10,6 +10,7 @@
     "module.cpp"
    ],
    "libraries":[
+    "-lyolo",
     "-lm",
     "-pthread",
     "-lstdc++"
@@ -18,14 +19,11 @@
     "NAPI_DISABLE_CPP_EXCEPTIONS"
    ],
    "include_dirs":[
-    "./src",
-    "./"
    ],
    "cflags":[
     "-Wall",
     "-Wfatal-errors",
-    "-fPIC",
-    "-Ofast"
+    "-fPIC"
    ],
    "conditions":[
     [

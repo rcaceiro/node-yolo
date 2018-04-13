@@ -18,7 +18,7 @@
  "main":"NodeYoloJS",
  "gypfile":true,
  "scripts":{
-  "preinstall":"make && node-gyp configure && node-gyp build"
+  "preinstall":"make && sudo make install && make clean && node-gyp configure && node-gyp build --debug"
  },
  "engines":{
   "node":">=8"

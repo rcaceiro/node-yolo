@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "darknet.h"
-#include "./darknet/src/option_list.h"
-#include "./darknet/src/image.h"
+#include "option_list.h"
+#include "image.h"
 
 typedef void *yolo_handle;
 
