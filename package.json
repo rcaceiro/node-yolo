@@ -15,10 +15,10 @@
   "type":"git",
   "url":"https://github.com/r-neves/NodeYoloJS.git"
  },
- "main":"NodeYoloJS",
+ "main":"index.js",
  "gypfile":true,
  "scripts":{
-  "preinstall":"make && sudo make install && make clean && node-gyp configure && node-gyp build --debug"
+  "preinstall":"make && sudo make install && make clean && node-gyp configure && node-gyp build"
  },
  "engines":{
   "node":">=8"
