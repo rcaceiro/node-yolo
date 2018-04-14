@@ -4,8 +4,7 @@ OPENCV=0
 OPENMP=0
 DEBUG=0
 
-ARCH= -gencode arch=compute_20,code=[sm_20,sm_21] \
-      -gencode arch=compute_30,code=sm_30 \
+ARCH= -gencode arch=compute_30,code=sm_30 \
       -gencode arch=compute_35,code=sm_35 \
       -gencode arch=compute_50,code=[sm_50,compute_50] \
       -gencode arch=compute_52,code=[sm_52,compute_52]
@@ -115,12 +114,12 @@ clean:
 	rm -rf obj
 
 install:
-	cp $(SLIB_DIR) /usr/local/lib/$(SLIB)
-	cp $(ALIB_DIR) /usr/local/lib/$(ALIB)
+	cp $(SLIB_DIR) /usr/local/$(SLIB)
+	cp $(ALIB_DIR) /usr/local/$(ALIB)
 	mkdir -p /usr/local/include/yolo
 	cp yolo/src/libyolo.h /usr/local/include/yolo/libyolo.h
 	cp ./darknet/include/darknet.h /usr/local/include/yolo/darknet.h
 	cp ./darknet/src/*.h /usr/local/include/yolo/
 
 unistall:
-	rm -rf /usr/local/include/yolo /usr/local/lib/$(SLIB) /usr/local/lib/$(ALIB)
+	rm -rf /usr/local/include/yolo /usr/lib/$(SLIB) /usr/lib/$(ALIB)
