@@ -8,7 +8,7 @@ ifeq ($(NVCC_TEST),nvcc)
 	CUDNN=1
 endif
 
-OPENCV=$(shell pkg-config --cflags opencv > /dev/null 2> /dev/null && echo 1 || echo 0)
+#OPENCV=$(shell pkg-config --cflags opencv > /dev/null 2> /dev/null && echo 1 || echo 0)
 OPENCV=0
 OPENMP=0
 DEBUG=0
