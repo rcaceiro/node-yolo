@@ -6,13 +6,13 @@
     "src/module.cpp"
    ],
    "libraries":[
-    "-lyolo"
+    "<(module_root_dir)/yolo/libyolo.a"
    ],
    "defines":[
     "NAPI_DISABLE_CPP_EXCEPTIONS"
    ],
    "include_dirs":[
-    "/usr/local/include/yolo"
+    "<(module_root_dir)/yolo/src"
    ],
    "cflags":[
     "-Wall",

@@ -117,12 +117,12 @@ clean:
 	rm -rf obj
 
 install:
-	sudo cp $(SLIB_DIR) /usr/$(MAC_OS_LOCAL_FOLDER)lib/$(SLIB)
-	sudo cp $(ALIB_DIR) /usr/$(MAC_OS_LOCAL_FOLDER)lib/$(ALIB)
-	mkdir -p /usr/local/include/yolo
-	cp yolo/src/libyolo.h /usr/local/include/yolo/libyolo.h
-	cp ./darknet/include/darknet.h /usr/local/include/yolo/darknet.h
-	cp ./darknet/src/*.h /usr/local/include/yolo/
+	#sudo cp $(SLIB_DIR) /usr/$(MAC_OS_LOCAL_FOLDER)lib/$(SLIB)
+	#sudo cp $(ALIB_DIR) /usr/$(MAC_OS_LOCAL_FOLDER)lib/$(ALIB)
+	#mkdir -p /usr/local/include/yolo
+	#cp yolo/src/libyolo.h /usr/local/include/yolo/libyolo.h
+	#cp ./darknet/include/darknet.h /usr/local/include/yolo/darknet.h
+	#cp ./darknet/src/*.h /usr/local/include/yolo/
 
 unistall:
 	rm -rf /usr/local/include/yolo /usr/$(MAC_OS_LOCAL_FOLDER)lib/$(SLIB) /usr/$(MAC_OS_LOCAL_FOLDER)lib/$(ALIB)
