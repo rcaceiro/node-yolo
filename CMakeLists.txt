@@ -9,5 +9,5 @@ INCLUDE_DIRECTORIES(darknet/include)
 INCLUDE_DIRECTORIES(/usr/local/include/node)
 
 ADD_EXECUTABLE(NodeYoloJS
-			libyolo.h
-			libyolo.c src/module.cpp src/module.cpp src/module.h)
+			yolo/src/libyolo.h
+			yolo/src/libyolo.c src/module.cpp src/module.cpp src/module.h)
