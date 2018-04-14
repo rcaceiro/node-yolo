@@ -21,7 +21,7 @@ ALIB=libyolo.a
 OBJDIR=./obj/
 
 CC=gcc
-NVCC=nvcc 
+NVCC=nvcc
 AR=ar
 ARFLAGS=rcs
 OPTS=
@@ -108,12 +108,11 @@ clean:
 install:
 
 	cp $(SLIB) /usr/local/lib/$(SLIB)
+	cp $(ALIB) /usr/local/lib/$(ALIB)
 	mkdir -p /usr/local/include/yolo
 	cp libyolo.h /usr/local/include/yolo/libyolo.h
-	cp -f darknet/include/darknet.h /usr/local/include/darknet.h
-	cp -f darknet/src/*.h /usr/local/include/
-	#ln -s /usr/local/include/yolo/darknet.h /usr/local/include/darknet.h
-	#ln -s /usr/local/include/yolo/libyolo.h /usr/local/include/libyolo.h
+	cp -f darknet/include/darknet.h /usr/local/include/yolo/darknet.h
+	cp -f darknet/src/*.h /usr/local/include/yolo
 
 unistall:
-	rm -rf /usr/local/include/darknet.h /usr/local/include/libyolo.h /usr/local/include/yolo /usr/local/lib/$(SLIB) /usr/local/lib/$(ALIB)
+	rm -rf /usr/local/include/yolo /usr/local/lib/$(SLIB) /usr/local/lib/$(ALIB)
