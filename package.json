@@ -1,26 +1,26 @@
 {
- "name":"NodeYoloJS",
- "version":"0.0.1",
- "description":"NodeJS interface for Yolo/Darknet",
- "keywords":[
+ "name": "NodeYoloJS",
+ "version": "0.0.1",
+ "description": "NodeJS interface for Yolo/Darknet",
+ "keywords": [
   "yolo",
   "darknet",
   "recognition"
  ],
- "homepage":"https://github.com/r-neves/NodeYoloJS",
- "bugs":{
-  "url":"https://github.com/r-neves/NodeYoloJS/issues"
+ "homepage": "https://github.com/r-neves/NodeYoloJS",
+ "bugs": {
+  "url": "https://github.com/r-neves/NodeYoloJS/issues"
  },
- "repository":{
-  "type":"git",
-  "url":"https://github.com/r-neves/NodeYoloJS.git"
+ "repository": {
+  "type": "git",
+  "url": "https://github.com/r-neves/NodeYoloJS.git"
  },
- "main":"index.js",
- "gypfile":true,
- "scripts":{
-  "preinstall":"make && sudo make install && make clean && node-gyp configure && node-gyp build"
+ "main": "index.js",
+ "gypfile": true,
+ "scripts": {
+  "preinstall": "make && make clean && node-gyp configure && node-gyp build"
  },
- "engines":{
-  "node":">=8"
+ "engines": {
+  "node": ">=8"
  }
 }
