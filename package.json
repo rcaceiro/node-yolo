@@ -7,13 +7,13 @@
   "darknet",
   "recognition"
  ],
- "homepage": "https://github.com/r-neves/NodeYoloJS",
+ "homepage":"https://github.com/rcaceiro/NodeYoloJS",
  "bugs": {
-  "url": "https://github.com/r-neves/NodeYoloJS/issues"
+  "url":"https://github.com/rcaceiro/NodeYoloJS/issues"
  },
  "repository": {
   "type": "git",
-  "url": "https://github.com/r-neves/NodeYoloJS.git"
+  "url":"https://github.com/rcaceiro/NodeYoloJS.git"
  },
  "main": "index.js",
  "gypfile": true,
