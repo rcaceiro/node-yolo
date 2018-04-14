@@ -7,7 +7,7 @@
   {
    "target_name":"nodeyolojs",
    "sources":[
-    "module.cpp"
+    "src/module.cpp"
    ],
    "libraries":[
     "-lyolo",
@@ -19,6 +19,7 @@
     "NAPI_DISABLE_CPP_EXCEPTIONS"
    ],
    "include_dirs":[
+    "/usr/local/include/yolo"
    ],
    "cflags":[
     "-Wall",
