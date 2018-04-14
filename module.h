@@ -2,8 +2,9 @@
 #define NODEYOLOJS_MODULE_H
 
 #include <node_api.h>
+#include <cassert>
 extern "C" {
-#include "libyolo.h"
+#include <libyolo.h>
 }
 class Yolo
 {

@@ -1,5 +1,4 @@
 #include "module.h"
-#include <cassert>
 
 napi_status get_string_value(napi_env env, napi_value args[], size_t index, char **value, size_t value_size) {
     napi_status status;
