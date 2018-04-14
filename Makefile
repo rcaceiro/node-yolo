@@ -1,13 +1,14 @@
 GPU=0
 CUDNN=0
 
-NVCC_RESULT := $(shell which nvcc 2> NULL)
+NVCC_RESULT := $(shell which nvcc 2> /dev/null)
 NVCC_TEST := $(notdir $(NVCC_RESULT))
 ifeq ($(NVCC_TEST),nvcc)
 	GPU=1
 	CUDNN=1
 endif
 
+OPENCV=$(shell pkg-config --cflags opencv > /dev/null 2> /dev/null && echo 1 || echo 0)
 OPENCV=0
 OPENMP=0
 DEBUG=0
