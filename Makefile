@@ -15,6 +15,8 @@ ARCH= -gencode arch=compute_30,code=sm_30 \
 VPATH=./darknet/src/
 SHARE_LIB_OPT=
 
+MAC_OS_LOCAL_FOLDER=
+
 LIB_RAW_NAME=libyolo
 SLIB=
 SLIB_DIR=
@@ -40,6 +42,7 @@ ifeq ($(UNAME_S),Linux)
 endif
 ifeq ($(UNAME_S),Darwin)
 	SHARE_LIB_OPT += -dynamiclib
+	MAC_OS_LOCAL_FOLDER=local/
      SLIB=$(addprefix $(LIB_RAW_NAME),.dylib)
 endif
 
@@ -114,12 +117,12 @@ clean:
 	rm -rf obj
 
 install:
-	cp $(SLIB_DIR) /usr/lib/$(SLIB)
-	cp $(ALIB_DIR) /usr/lib/$(ALIB)
+	sudo cp $(SLIB_DIR) /usr/$(MAC_OS_LOCAL_FOLDER)lib/$(SLIB)
+	sudo cp $(ALIB_DIR) /usr/$(MAC_OS_LOCAL_FOLDER)lib/$(ALIB)
 	mkdir -p /usr/local/include/yolo
 	cp yolo/src/libyolo.h /usr/local/include/yolo/libyolo.h
 	cp ./darknet/include/darknet.h /usr/local/include/yolo/darknet.h
 	cp ./darknet/src/*.h /usr/local/include/yolo/
 
 unistall:
-	rm -rf /usr/local/include/yolo /usr/lib/$(SLIB) /usr/lib/$(ALIB)
+	rm -rf /usr/local/include/yolo /usr/$(MAC_OS_LOCAL_FOLDER)lib/$(SLIB) /usr/$(MAC_OS_LOCAL_FOLDER)lib/$(ALIB)
