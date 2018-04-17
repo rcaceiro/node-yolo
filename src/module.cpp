@@ -27,7 +27,7 @@ napi_status get_string_value(napi_env env, napi_value args[], size_t index, char
 napi_ref Yolo::constructor;
 
 Yolo::Yolo(char *darknet_path, char *datacfg, char *cfgfile, char *weightfile) : env_(nullptr), wrapper_(nullptr) {
-    yolo_init(darknet_path, datacfg, cfgfile, weightfile);
+    yolo_init(datacfg, cfgfile, weightfile);
 }
 
 Yolo::~Yolo() {

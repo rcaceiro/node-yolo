@@ -1,7 +1,16 @@
 #ifndef LIBYOLO_H
 #define LIBYOLO_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "darknet.h"
+
+#ifdef __cplusplus
+}
+#endif
+
+#include <unistd.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,11 +22,20 @@ typedef struct
  int num_boxes;
 }yolo_detection;
 
-network *yolo_init(char *darknet_path, char *datacfg, char *cfgfile, char *weightfile);
+typedef struct
+{
+ char **names;
+ float nms;
+ network *net;
+}yolo_object;
+
+yolo_object *yolo_init(char *datacfg, char *cfgfile, char *weightfile);
 
 void yolo_cleanup(network *net);
 
-yolo_detection *yolo_detect(network *net, image im, float thresh, float hier_thresh, int *num);
+yolo_detection *yolo_detect(network *net, char *filename, float thresh);
+
+void yolo_detection_free(yolo_detection **yolo);
 #ifdef __cplusplus
 }
 #endif

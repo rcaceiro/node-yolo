@@ -3,7 +3,11 @@
 
 #include <node_api.h>
 #include <cassert>
+
+extern "C" {
 #include <libyolo.h>
+};
+
 
 class Yolo
 {
@@ -25,7 +29,7 @@ private:
  napi_env env_;
  napi_ref wrapper_;
 
- yolo_handle network;
+ yolo_object yolo;
 };
 
 #endif
