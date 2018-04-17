@@ -106,9 +106,6 @@ $(SLIB_DIR): $(OBJS)
 $(OBJDIR)%.o: %.c $(DEPS)
 	$(CC) $(COMMON) $(CFLAGS) -c $< -o $@
 
-exe: $(OBJS)
-	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
-
 obj/libyolo.o: yolo/src/libyolo.c yolo/src/libyolo.h ./darknet/include/darknet.h
 	$(CC) $(COMMON) $(CFLAGS) -c $< -o $@
 
