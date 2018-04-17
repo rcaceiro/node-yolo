@@ -22,7 +22,7 @@ typedef struct
 
 yolo_object *yolo_init(char *datacfg, char *cfgfile, char *weightfile);
 
-void yolo_cleanup(network *net);
+void yolo_cleanup(yolo_object *yolo);
 
 yolo_detection *yolo_detect(network *net, char *filename, float thresh);
 

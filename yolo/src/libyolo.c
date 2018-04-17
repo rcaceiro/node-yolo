@@ -37,6 +37,15 @@ void print_yolo_detections(FILE **fps, char *id, int total, int classes, int w, 
  }
 }
 
+void yolo_cleanup(yolo_object *yolo)
+{
+ free_network(yolo->net);
+ free(yolo->names);
+ free(yolo);
+ yolo_object **ptr_yolo=&yolo;
+ (*ptr_yolo)=NULL;
+}
+
 yolo_object *yolo_init(char *datacfg, char *cfgfile, char *weightfile)
 {
  clock_t time=clock();
@@ -110,10 +119,3 @@ void yolo_detection_free(yolo_detection **yolo)
  free(detection);
  (*yolo)=NULL;
 }
-
-//int main(int argc, char *argv[])
-//{
-// yolo_object *net=yolo_init("darknet/cfg/coco.data","darknet/cfg/yolo3.cfg","yolov3.weights");
-//
-// return 0;
-//}
