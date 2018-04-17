@@ -3,11 +3,7 @@
 
 #include <node_api.h>
 #include <cassert>
-
-extern "C" {
 #include <libyolo.h>
-};
-
 
 class Yolo
 {
