@@ -1,14 +1,12 @@
 #ifndef LIBYOLO_H
 #define LIBYOLO_H
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #include "darknet.h"
 #include <unistd.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 typedef struct
 {
  detection *detection;
