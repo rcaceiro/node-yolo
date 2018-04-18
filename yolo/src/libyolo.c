@@ -75,7 +75,7 @@ yolo_object *yolo_init(char *workingDir, char *datacfg, char *cfgfile, char *wei
  srand(2222222);
 
  printf("Network configured and loaded in %f seconds\n", sec(clock()-time));
- chdir(workingDir);
+ chdir(cur_dir);
  return yolo;
 }
 
