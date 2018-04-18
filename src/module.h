@@ -9,23 +9,19 @@ class Yolo
 {
 public:
  static napi_value Init(napi_env env, napi_value exports);
-
  static void Destructor(napi_env env, void *nativeObject, void *finalize_hint);
 
 private:
- explicit Yolo(char *darknet_path, char *datacfg, char *cfgfile, char *weightfile);
-
+ explicit Yolo(char *working_directory, char *datacfg, char *cfgfile, char *weightfile);
  ~Yolo();
-
  static napi_value New(napi_env env, napi_callback_info info);
-
  static napi_value Detect(napi_env env, napi_callback_info info);
-
  static napi_ref constructor;
+
  napi_env env_;
  napi_ref wrapper_;
 
- yolo_object yolo;
+ static yolo_object *yolo;
 };
 
 #endif
