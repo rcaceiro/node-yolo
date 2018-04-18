@@ -74,7 +74,7 @@ yolo_object *yolo_init(char *workingDir, char *datacfg, char *cfgfile, char *wei
  set_batch_network(yolo->net, 1);
  srand(2222222);
 
- printf("Network configured and loaded in %f", sec(clock()-time));
+ printf("Network configured and loaded in %f seconds\n", sec(clock()-time));
  chdir(workingDir);
  return yolo;
 }
