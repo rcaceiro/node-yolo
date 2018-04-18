@@ -79,21 +79,26 @@ yolo_object *yolo_init(char *workingDir, char *datacfg, char *cfgfile, char *wei
  return yolo;
 }
 
-yolo_detection *yolo_detect(network *net, char *filename, float thresh)
+yolo_detection *yolo_detect(yolo_object *yolo, char *filename, float thresh)
 {
- layer l=net->layers[net->n-1];
+ if(yolo == NULL)
+ {
+  return NULL;
+ }
+
+ layer l=yolo->net->layers[yolo->net->n-1];
  clock_t time;
  float nms=.4;
 
  image im=load_image_color(filename, 0, 0);
- image sized=resize_image(im, net->w, net->h);
+ image sized=resize_image(im, yolo->net->w, yolo->net->h);
  float *X=sized.data;
  time=clock();
- network_predict(net, X);
+ network_predict(yolo->net, X);
  printf("%s: Predicted in %f seconds.\n", filename, sec(clock()-time));
 
  int nboxes=0;
- detection *dets=get_network_boxes(net, 1, 1, thresh, 0, 0, 0, &nboxes);
+ detection *dets=get_network_boxes(yolo->net, 1, 1, thresh, 0, 0, 0, &nboxes);
  if(nms)
  {
   do_nms_sort(dets, l.side*l.side*l.n, l.classes, nms);

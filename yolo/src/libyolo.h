@@ -25,7 +25,7 @@ yolo_object *yolo_init(char *workingDir, char *datacfg, char *cfgfile, char *wei
 
 void yolo_cleanup(yolo_object *yolo);
 
-yolo_detection *yolo_detect(network *net, char *filename, float thresh);
+yolo_detection *yolo_detect(yolo_object *yolo, char *filename, float thresh);
 
 void yolo_detection_free(yolo_detection **yolo);
 
