@@ -21,7 +21,7 @@ typedef struct
  network *net;
 }yolo_object;
 
-yolo_object *yolo_init(char *datacfg, char *cfgfile, char *weightfile);
+yolo_object *yolo_init(char *workingDir, char *datacfg, char *cfgfile, char *weightfile);
 
 void yolo_cleanup(yolo_object *yolo);
 
