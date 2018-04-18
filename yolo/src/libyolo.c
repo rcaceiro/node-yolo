@@ -46,7 +46,7 @@ void yolo_cleanup(yolo_object *yolo)
  (*ptr_yolo)=NULL;
 }
 
-yolo_object *yolo_init(char *datacfg, char *cfgfile, char *weightfile)
+yolo_object *yolo_init(char *workingDir, char *datacfg, char *cfgfile, char *weightfile)
 {
  clock_t time=clock();
 
@@ -59,8 +59,11 @@ yolo_object *yolo_init(char *datacfg, char *cfgfile, char *weightfile)
 
  char cur_dir[1024];
  getcwd(cur_dir, sizeof(cur_dir));
-
- printf("%s", cur_dir);
+ if(chdir(workingDir) == -1)
+ {
+  fprintf(stderr, "%s\n", strerror(errno));
+  return NULL;
+ }
 
  yolo->net=load_network(cfgfile, weightfile, 0);
 
@@ -72,6 +75,7 @@ yolo_object *yolo_init(char *datacfg, char *cfgfile, char *weightfile)
  srand(2222222);
 
  printf("Network configured and loaded in %f", sec(clock()-time));
+ chdir(workingDir);
  return yolo;
 }
 
