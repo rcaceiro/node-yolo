@@ -30,8 +30,72 @@ napi_status get_string_value(napi_env env, napi_value args[], size_t index, char
  return napi_ok;
 }
 
+void load_box_object(napi_env env, box img_box, napi_value jsbox)
+{
+ napi_status status;
+ napi_value x, y, w, h;
+ status=napi_create_double(env, img_box.x, &x);
+ assert(status == napi_ok);
+ status=napi_set_named_property(env, jsbox, "x", x);
+ assert(status == napi_ok);
+ status=napi_create_double(env, img_box.y, &y);
+ assert(status == napi_ok);
+ status=napi_set_named_property(env, jsbox, "y", y);
+ assert(status == napi_ok);
+ status=napi_create_double(env, img_box.w, &w);
+ assert(status == napi_ok);
+ status=napi_set_named_property(env, jsbox, "w", w);
+ assert(status == napi_ok);
+ status=napi_create_double(env, img_box.h, &h);
+ assert(status == napi_ok);
+ status=napi_set_named_property(env, jsbox, "h", h);
+ assert(status == napi_ok);
+}
+
+void load_detections(napi_env env, yolo_detection *img_detections, napi_value jsarray)
+{
+ napi_status status;
+ napi_value jsobj, box_object, classes, prob, objectness, sort_class;
+ detection detect;
+ for(int i=0; i<img_detections->num_boxes; ++i)
+ {
+  detect=img_detections->detection[i];
+  status=napi_create_object(env, &jsobj);
+  assert(status == napi_ok);
+  status=napi_set_element(env, jsarray, (uint32_t)i, jsobj);
+  assert(status == napi_ok);
+  status=napi_create_int32(env, detect.classes, &classes);
+  assert(status == napi_ok);
+  status=napi_set_named_property(env, jsobj, "classes", classes);
+  assert(status == napi_ok);
+  status=napi_create_int32(env, detect.sort_class, &sort_class);
+  assert(status == napi_ok);
+  status=napi_set_named_property(env, jsobj, "sort_class", sort_class);
+  assert(status == napi_ok);
+  status=napi_create_double(env, detect.objectness, &objectness);
+  assert(status == napi_ok);
+  status=napi_set_named_property(env, jsobj, "objectness", objectness);
+  assert(status == napi_ok);
+  status=napi_create_object(env, &box_object);
+  assert(status == napi_ok);
+  status=napi_set_named_property(env, jsobj, "box", box_object);
+  assert(status == napi_ok);
+  load_box_object(env, detect.bbox, box_object);
+  if(detect.prob != nullptr)
+  {
+   status=napi_create_double(env, *detect.prob, &prob);
+  }
+  else
+  {
+   status=napi_get_undefined(env, &prob);
+  }
+  assert(status == napi_ok);
+  status=napi_set_named_property(env, jsobj, "prob", prob);
+  assert(status == napi_ok);
+ }
+}
+
 napi_ref Yolo::constructor;
-yolo_object *Yolo::yolo;
 
 Yolo::Yolo(char *working_directory, char *datacfg, char *cfgfile, char *weightfile) : env_(nullptr), wrapper_(nullptr)
 {
@@ -128,7 +192,7 @@ napi_value Yolo::New(napi_env env, napi_callback_info info)
 napi_value Yolo::Detect(napi_env env, napi_callback_info info)
 {
  napi_status status;
- napi_value instance;
+ napi_value instance=nullptr;
  napi_value jsthis;
 
  size_t argc=1;
@@ -147,10 +211,24 @@ napi_value Yolo::Detect(napi_env env, napi_callback_info info)
   return instance;
  }
 
- yolo_detection *img_detection=yolo_detect(Yolo::yolo, image_path, 0.75);
-
- status=napi_create_string_utf8(env, image_path, strlen(image_path), &instance);
+ void *obj=nullptr;
+ status=napi_unwrap(env, jsthis, &obj);
  assert(status == napi_ok);
+ Yolo *yolo_obj=static_cast<Yolo *>(obj);
+ yolo_detection *img_detection=yolo_detect(yolo_obj->yolo, image_path, 0.75);
+
+ napi_value yolo_detections_number, yolo_detections;
+ status=napi_create_object(env, &instance);
+ assert(status == napi_ok);
+ status=napi_create_int32(env, img_detection->num_boxes, &yolo_detections_number);
+ assert(status == napi_ok);
+ status=napi_create_array_with_length(env, (size_t)img_detection->num_boxes, &yolo_detections);
+ assert(status == napi_ok);
+ status=napi_set_named_property(env, instance, "detections_number", yolo_detections_number);
+ assert(status == napi_ok);
+ status=napi_set_named_property(env, instance, "detections", yolo_detections);
+ assert(status == napi_ok);
+ load_detections(env, img_detection, yolo_detections);
  return instance;
 }
 

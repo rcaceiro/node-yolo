@@ -21,7 +21,7 @@ private:
  napi_env env_;
  napi_ref wrapper_;
 
- static yolo_object *yolo;
+ yolo_object *yolo;
 };
 
 #endif
