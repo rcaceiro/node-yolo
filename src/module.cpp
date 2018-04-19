@@ -214,7 +214,7 @@ napi_value Yolo::Detect(napi_env env, napi_callback_info info)
  void *obj=nullptr;
  status=napi_unwrap(env, jsthis, &obj);
  assert(status == napi_ok);
- Yolo *yolo_obj=static_cast<Yolo *>(obj);
+ auto *yolo_obj=static_cast<Yolo *>(obj);
  yolo_detection *img_detection=yolo_detect(yolo_obj->yolo, image_path, 0.75);
 
  napi_value yolo_detections_number, yolo_detections;
