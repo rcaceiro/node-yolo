@@ -95,6 +95,42 @@ void load_detections(napi_env env, yolo_detection *img_detections, napi_value js
  }
 }
 
+void completeAsyncDetect(napi_env env, napi_status status, void *data)
+{
+ auto *holder=static_cast<data_holder *>(data);
+
+ napi_callback_scope scope=nullptr;
+ napi_open_callback_scope(env, holder->resource, holder->context, &scope);
+
+ napi_resolve_deferred(env, holder->deferred, holder->return_value);
+
+ napi_close_callback_scope(env, scope);
+
+ napi_async_destroy(env, holder->context);
+}
+
+void asyncDetect(napi_env env, void *data)
+{
+ auto *holder=static_cast<data_holder *>(data);
+ yolo_detection *img_detection=yolo_detect(holder->yolo, holder->image_path, 0.75);
+
+ napi_status status;
+ napi_value jsobj, yolo_detections_number, yolo_detections;
+ status=napi_create_object(env, &jsobj);
+ assert(status == napi_ok);
+ status=napi_create_int32(env, img_detection->num_boxes, &yolo_detections_number);
+ assert(status == napi_ok);
+ status=napi_create_array_with_length(env, (size_t)img_detection->num_boxes, &yolo_detections);
+ assert(status == napi_ok);
+ status=napi_set_named_property(env, jsobj, "detections_number", yolo_detections_number);
+ assert(status == napi_ok);
+ status=napi_set_named_property(env, jsobj, "detections", yolo_detections);
+ assert(status == napi_ok);
+ load_detections(env, img_detection, yolo_detections);
+
+ holder->return_value=jsobj;
+}
+
 napi_ref Yolo::constructor;
 
 Yolo::Yolo(char *working_directory, char *datacfg, char *cfgfile, char *weightfile) : env_(nullptr), wrapper_(nullptr)
@@ -192,44 +228,63 @@ napi_value Yolo::New(napi_env env, napi_callback_info info)
 napi_value Yolo::Detect(napi_env env, napi_callback_info info)
 {
  napi_status status;
- napi_value instance=nullptr;
+ napi_deferred deferred;
+ napi_value promise;
  napi_value jsthis;
-
  size_t argc=1;
  napi_value args[1];
+
+ status=napi_create_promise(env, &deferred, &promise);
+ assert(status == napi_ok);
+
  status=napi_get_cb_info(env, info, &argc, args, &jsthis, nullptr);
  assert(status == napi_ok);
  if(argc<1)
  {
-  return instance;
+  return promise;
  }
- char *image_path=nullptr;
- get_string_value(env, args, 0, &image_path, 0);
 
+ char *image_path=nullptr;
+ status=get_string_value(env, args, 0, &image_path, 0);
+ assert(status == napi_ok);
  if(image_path == nullptr)
  {
-  return instance;
+  return promise;
  }
 
  void *obj=nullptr;
  status=napi_unwrap(env, jsthis, &obj);
  assert(status == napi_ok);
  auto *yolo_obj=static_cast<Yolo *>(obj);
- yolo_detection *img_detection=yolo_detect(yolo_obj->yolo, image_path, 0.75);
 
- napi_value yolo_detections_number, yolo_detections;
- status=napi_create_object(env, &instance);
+ napi_value resource_name;
+ napi_value resource;
+ status=napi_create_string_utf8(env, "nodeyolojs.detect", 18, &resource_name);
  assert(status == napi_ok);
- status=napi_create_int32(env, img_detection->num_boxes, &yolo_detections_number);
+ status=napi_create_object(env, &resource);
  assert(status == napi_ok);
- status=napi_create_array_with_length(env, (size_t)img_detection->num_boxes, &yolo_detections);
+
+ napi_async_context context;
+ napi_async_init(env, resource, resource_name, &context);
+
+ auto *holder=static_cast<data_holder *>(calloc(1, sizeof(data_holder)));
+ if(holder == nullptr)
+ {
+  return promise;
+ }
+ holder->deferred=deferred;
+ holder->image_path=image_path;
+ holder->yolo=yolo_obj->yolo;
+ holder->context=context;
+ holder->resource=resource;
+
+ napi_async_work result;
+ status=napi_create_async_work(env, resource, resource_name, asyncDetect, completeAsyncDetect, holder, &result);
  assert(status == napi_ok);
- status=napi_set_named_property(env, instance, "detections_number", yolo_detections_number);
+ status=napi_queue_async_work(env, result);
  assert(status == napi_ok);
- status=napi_set_named_property(env, instance, "detections", yolo_detections);
- assert(status == napi_ok);
- load_detections(env, img_detection, yolo_detections);
- return instance;
+
+ return promise;
 }
 
 NAPI_MODULE(NodeYoloJS, Yolo::Init);
