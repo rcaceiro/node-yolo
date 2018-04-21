@@ -12,9 +12,6 @@
    "libraries":[
     "<(module_root_dir)/yolo/libyolo.a"
    ],
-   "dependencies":[
-    "<!(node -p \"require('node-addon-api').gyp\")"
-   ],
    "defines":[
     "NAPI_DISABLE_CPP_EXCEPTIONS"
    ],
@@ -22,7 +19,6 @@
     "<(module_root_dir)/yolo/src",
     "<(module_root_dir)/darknet/src",
     "<(module_root_dir)/darknet/include",
-    "<!@(node -p \"require('node-addon-api').include\")"
    ],
    "cflags":[
     "-Wall",
@@ -32,7 +28,7 @@
    "xcode_settings":{
     "GCC_ENABLE_CPP_EXCEPTIONS":"YES",
     "CLANG_CXX_LIBRARY":"libc++",
-    "MACOSX_DEPLOYMENT_TARGET":"10.7"
+    "MACOSX_DEPLOYMENT_TARGET":"10.13"
    },
    "msvs_settings":{
     "VCCLCompilerTool":{
