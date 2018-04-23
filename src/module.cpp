@@ -95,47 +95,46 @@ void load_detections(napi_env env, yolo_detection *img_detections, napi_value js
  }
 }
 
-void completeAsyncDetect(napi_env env, napi_status status, void *data)
+void complete_async_detect(napi_env env, napi_status status, void *data)
 {
  auto *holder=static_cast<data_holder *>(data);
 
- napi_callback_scope scope=nullptr;
- napi_open_callback_scope(env, holder->resource, holder->context, &scope);
+ napi_value instance;
+ status=napi_create_object(env, &instance);
+ assert(status == napi_ok);
+ napi_value yolo_detections_number, yolo_detections;
+ status=napi_create_int32(env, holder->img_detection->num_boxes, &yolo_detections_number);
+ assert(status == napi_ok);
+ status=napi_create_array_with_length(env, (size_t)holder->img_detection->num_boxes, &yolo_detections);
+ assert(status == napi_ok);
+ status=napi_set_named_property(env, instance, "detections_number", yolo_detections_number);
+ assert(status == napi_ok);
+ status=napi_set_named_property(env, instance, "detections", yolo_detections);
+ assert(status == napi_ok);
+ load_detections(env, holder->img_detection, yolo_detections);
 
- napi_resolve_deferred(env, holder->deferred, holder->return_value);
+ napi_resolve_deferred(env, holder->deferred, instance);
 
- napi_close_callback_scope(env, scope);
+ //yolo_detection_free(&holder->img_detection);
+ napi_async_work work=holder->work;
 
- napi_async_destroy(env, holder->context);
+ free(holder->image_path);
+ free(holder);
+
+ napi_delete_async_work(env, work);
 }
 
-void asyncDetect(napi_env env, void *data)
+void async_detect(napi_env env, void *data)
 {
  auto *holder=static_cast<data_holder *>(data);
- yolo_detection *img_detection=yolo_detect(holder->yolo, holder->image_path, 0.75);
-
- napi_status status;
- napi_value jsobj, yolo_detections_number, yolo_detections;
- status=napi_create_object(env, &jsobj);
- assert(status == napi_ok);
- status=napi_create_int32(env, img_detection->num_boxes, &yolo_detections_number);
- assert(status == napi_ok);
- status=napi_create_array_with_length(env, (size_t)img_detection->num_boxes, &yolo_detections);
- assert(status == napi_ok);
- status=napi_set_named_property(env, jsobj, "detections_number", yolo_detections_number);
- assert(status == napi_ok);
- status=napi_set_named_property(env, jsobj, "detections", yolo_detections);
- assert(status == napi_ok);
- load_detections(env, img_detection, yolo_detections);
-
- holder->return_value=jsobj;
+ holder->img_detection=yolo_detect(holder->yolo, holder->image_path, 0.75);
 }
 
 napi_ref Yolo::constructor;
 
 Yolo::Yolo(char *working_directory, char *datacfg, char *cfgfile, char *weightfile) : env_(nullptr), wrapper_(nullptr)
 {
- Yolo::yolo=yolo_init(working_directory, datacfg, cfgfile, weightfile);
+ this->yolo=yolo_init(working_directory, datacfg, cfgfile, weightfile);
 }
 
 Yolo::~Yolo()
@@ -193,7 +192,7 @@ napi_value Yolo::New(napi_env env, napi_callback_info info)
   get_string_value(env, args, 2, &cfgfile, 0);
   get_string_value(env, args, 3, &weightfile, 0);
 
-  Yolo *obj=new Yolo(darknet_path, datacfg, cfgfile, weightfile);
+  auto *obj=new Yolo(darknet_path, datacfg, cfgfile, weightfile);
 
   obj->env_=env;
   status=napi_wrap(env, jsthis, reinterpret_cast<void *>(obj), Yolo::Destructor, nullptr,  // finalize_hint
@@ -234,14 +233,12 @@ napi_value Yolo::Detect(napi_env env, napi_callback_info info)
  size_t argc=1;
  napi_value args[1];
 
- status=napi_create_promise(env, &deferred, &promise);
- assert(status == napi_ok);
-
  status=napi_get_cb_info(env, info, &argc, args, &jsthis, nullptr);
  assert(status == napi_ok);
  if(argc<1)
  {
-  return promise;
+  napi_throw_error(env, "01", "You have to pass the path to image as parameter");
+  return nullptr;
  }
 
  char *image_path=nullptr;
@@ -249,7 +246,8 @@ napi_value Yolo::Detect(napi_env env, napi_callback_info info)
  assert(status == napi_ok);
  if(image_path == nullptr)
  {
-  return promise;
+  napi_throw_error(env, "02", "Cannot get image path");
+  return nullptr;
  }
 
  void *obj=nullptr;
@@ -264,26 +262,25 @@ napi_value Yolo::Detect(napi_env env, napi_callback_info info)
  status=napi_create_object(env, &resource);
  assert(status == napi_ok);
 
- napi_async_context context;
- napi_async_init(env, resource, resource_name, &context);
-
  auto *holder=static_cast<data_holder *>(calloc(1, sizeof(data_holder)));
  if(holder == nullptr)
  {
-  return promise;
+  napi_throw_error(env, "03", "Cannot allocate a struct in memory");
+  return nullptr;
  }
+
+ status=napi_create_promise(env, &deferred, &promise);
+ assert(status == napi_ok);
+
  holder->deferred=deferred;
  holder->image_path=image_path;
  holder->yolo=yolo_obj->yolo;
- holder->context=context;
  holder->resource=resource;
 
- napi_async_work result;
- status=napi_create_async_work(env, resource, resource_name, asyncDetect, completeAsyncDetect, holder, &result);
+ status=napi_create_async_work(env, resource, resource_name, async_detect, complete_async_detect, holder, &holder->work);
  assert(status == napi_ok);
- status=napi_queue_async_work(env, result);
+ status=napi_queue_async_work(env, holder->work);
  assert(status == napi_ok);
-
  return promise;
 }
 
