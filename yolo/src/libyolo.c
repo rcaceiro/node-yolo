@@ -98,7 +98,7 @@ yolo_detection *yolo_detect(yolo_object *yolo, char *filename, float thresh)
  printf("%s: Predicted in %f seconds.\n", filename, sec(clock()-time));
 
  int nboxes=0;
- detection *dets=get_network_boxes(yolo->net, 1, 1, thresh, 0.5, 0, 0, &nboxes);
+ detection *dets=get_network_boxes(yolo->net, im.w, im.h, thresh, 0.5, 0, 0, &nboxes);
  if(nms)
  {
   do_nms_sort(dets, l.side*l.side*l.n, l.classes, nms);

@@ -15,7 +15,7 @@ let obj1 = new yolo_addon.Yolo("./darknet", "./cfg/coco.data", "./cfg/yolov3.cfg
 //
 obj1.detect("darknet/data/dog.jpg")
  .then((detections) => {
-  console.log(2);
+  console.log(JSON.stringify(detections));
  })
  .catch((error) => {
   console.error(error);
