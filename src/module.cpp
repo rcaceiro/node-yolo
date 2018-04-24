@@ -133,9 +133,10 @@ void *thread_func(void *data)
 
 void async_detect(napi_env env, void *data)
 {
- pthread_t pthread;
- pthread_create(&pthread, nullptr, thread_func, data);
- pthread_join(pthread, nullptr);
+ // pthread_t pthread;
+ // pthread_create(&pthread, nullptr, thread_func, data);
+ // pthread_join(pthread, nullptr);
+ thread_func(data);
 }
 
 napi_ref Yolo::constructor;

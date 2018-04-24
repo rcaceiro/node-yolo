@@ -98,7 +98,7 @@ OBJS = $(addprefix $(OBJDIR), $(OBJ))
 DEPS = $(wildcard src/*.h) Makefile ./darknet/include/darknet.h
 
 #all: obj backup results $(SLIB) $(ALIB)
-all: obj $(SLIB) $(ALIB)
+all: obj $(SLIB_DIR) $(ALIB_DIR)
 
 obj/libyolo.o: yolo/src/libyolo.c yolo/src/libyolo.h ./darknet/include/darknet.h
 	$(CC) $(COMMON) $(CFLAGS) -c $< -o $@
@@ -106,10 +106,10 @@ obj/libyolo.o: yolo/src/libyolo.c yolo/src/libyolo.h ./darknet/include/darknet.h
 $(EXEC): $(EXECOBJ) $(ALIB)
 	$(CC) $(COMMON) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(ALIB)
 
-$(ALIB): $(OBJS)
+$(ALIB_DIR): $(OBJS)
 	$(AR) $(ARFLAGS) $@ $^
 
-$(SLIB): $(OBJS)
+$(SLIB_DIR): $(OBJS)
 	$(CC) $(CFLAGS) -shared $^ -o $@ $(LDFLAGS)
 
 $(OBJDIR)%.o: %.c $(DEPS)
