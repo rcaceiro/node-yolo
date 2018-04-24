@@ -124,19 +124,10 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
  napi_delete_async_work(env, work);
 }
 
-void *thread_func(void *data)
+void async_detect(napi_env env, void *data)
 {
  auto *holder=static_cast<data_holder *>(data);
  holder->img_detection=yolo_detect(holder->yolo, holder->image_path, 0.50);
- return nullptr;
-}
-
-void async_detect(napi_env env, void *data)
-{
- // pthread_t pthread;
- // pthread_create(&pthread, nullptr, thread_func, data);
- // pthread_join(pthread, nullptr);
- thread_func(data);
 }
 
 napi_ref Yolo::constructor;
