@@ -21,7 +21,7 @@ private:
  napi_env env_;
  napi_ref wrapper_;
  yolo_object *yolo;
- Queue<char *> queue_img_path;
+ Queue<char *> *queue_img_path;
 
 };
 
