@@ -127,18 +127,22 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
 void async_detect(napi_env env, void *data)
 {
  auto *holder=static_cast<data_holder *>(data);
- holder->img_detection=yolo_detect(holder->yolo, holder->image_path, 0.50);
+ holder->yolo->mutex_lock();
+ holder->img_detection=yolo_detect(holder->yolo->yolo, holder->image_path, 0.50);
+ holder->yolo->mutex_unlock();
 }
 
 napi_ref Yolo::constructor;
 
 Yolo::Yolo(char *working_directory, char *datacfg, char *cfgfile, char *weightfile) : env_(nullptr), wrapper_(nullptr)
 {
+ pthread_mutex_init(&this->mutex, nullptr);
  this->yolo=yolo_init(working_directory, datacfg, cfgfile, weightfile);
 }
 
 Yolo::~Yolo()
 {
+ pthread_mutex_destroy(&this->mutex);
  yolo_cleanup(this->yolo);
  napi_delete_reference(env_, wrapper_);
 }
@@ -274,7 +278,7 @@ napi_value Yolo::Detect(napi_env env, napi_callback_info info)
 
  holder->deferred=deferred;
  holder->image_path=image_path;
- holder->yolo=yolo_obj->yolo;
+ holder->yolo=yolo_obj;
  holder->resource=resource;
 
  status=napi_create_async_work(env, resource, resource_name, async_detect, complete_async_detect, holder, &holder->work);
@@ -282,6 +286,16 @@ napi_value Yolo::Detect(napi_env env, napi_callback_info info)
  status=napi_queue_async_work(env, holder->work);
  assert(status == napi_ok);
  return promise;
+}
+
+void Yolo::mutex_lock()
+{
+ pthread_mutex_lock(&this->mutex);
+}
+
+void Yolo::mutex_unlock()
+{
+ pthread_mutex_unlock(&this->mutex);
 }
 
 NAPI_MODULE(NodeYoloJS, Yolo::Init);

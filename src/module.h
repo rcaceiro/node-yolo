@@ -10,6 +10,12 @@ class Yolo
 public:
  static napi_value Init(napi_env env, napi_value exports);
  static void Destructor(napi_env env, void *nativeObject, void *finalize_hint);
+
+ void mutex_lock();
+
+ void mutex_unlock();
+
+ yolo_object *yolo;
 private:
  explicit Yolo(char *working_directory, char *datacfg, char *cfgfile, char *weightfile);
  ~Yolo();
@@ -17,14 +23,14 @@ private:
  static napi_value Detect(napi_env env, napi_callback_info info);
  static napi_ref constructor;
 
+ pthread_mutex_t mutex;
  napi_env env_;
  napi_ref wrapper_;
- yolo_object *yolo;
 };
 
 typedef struct
 {
- yolo_object *yolo;
+ Yolo *yolo;
  char *image_path;
  napi_deferred deferred;
  napi_async_work work;

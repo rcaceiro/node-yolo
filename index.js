@@ -13,28 +13,20 @@ let obj1 = new yolo_addon("./darknet", "./cfg/coco.data", "./cfg/yolov3.cfg", ".
 //   console.error(error);
 //  });
 //
-obj1.detect("darknet/data/dog.jpg")
- .then((detections) => {
-  console.log(JSON.stringify(detections));
- })
- .catch((error) => {
-  console.error(error);
- });
+// obj1.detect("darknet/data/dog.jpg")
+//  .then((detections) => {
+//   console.log(JSON.stringify(detections));
+//  })
+//  .catch((error) => {
+//   console.error(error);
+//  });
 
-setInterval(function () {
-
-}, 1000);
-//
-// memwatch.on('leak', (info) => {
-//  console.error('Memory leak detected:\n', info);
-// });
-//
-// ['dog', 'eagle', 'giraffe', 'horses', 'kite', 'person', 'scream'].forEach((img) => {
-//  obj1.detect("darknet/data/" + img + ".jpg")
-//   .then((detections) => {
-//    console.log(img + "\n" + JSON.stringify(detections));
-//   })
-//   .catch((error) => {
-//    console.error(error);
-//   });
-// });
+['dog', 'eagle', 'giraffe', 'horses', 'kite', 'person', 'scream'].forEach((img) => {
+ obj1.detect("darknet/data/" + img + ".jpg")
+  .then((detections) => {
+   console.log(img + "\n" + JSON.stringify(detections));
+  })
+  .catch((error) => {
+   console.error(error);
+  });
+});
