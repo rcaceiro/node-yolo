@@ -134,7 +134,6 @@ napi_ref Yolo::constructor;
 
 Yolo::Yolo(char *working_directory, char *datacfg, char *cfgfile, char *weightfile) : env_(nullptr), wrapper_(nullptr)
 {
- this->queue_img_path=new std::queue();
  this->yolo=yolo_init(working_directory, datacfg, cfgfile, weightfile);
 }
 
@@ -142,7 +141,6 @@ Yolo::~Yolo()
 {
  yolo_cleanup(this->yolo);
  napi_delete_reference(env_, wrapper_);
- delete this->queue_img_path;
 }
 
 void Yolo::Destructor(napi_env env, void *nativeObject, void * /*finalize_hint*/)

@@ -21,6 +21,9 @@ obj1.detect("darknet/data/dog.jpg")
   console.error(error);
  });
 
+setInterval(function () {
+
+}, 1000);
 //
 // memwatch.on('leak', (info) => {
 //  console.error('Memory leak detected:\n', info);
