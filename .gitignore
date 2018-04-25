@@ -39,6 +39,7 @@ cmake-build-debug/
 
 #libyolo build folder
 obj/
+*.weights
 
 #NodeJS
 build/

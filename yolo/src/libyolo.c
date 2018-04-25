@@ -1,176 +1,130 @@
 #include "libyolo.h"
 
-typedef struct
+void print_yolo_detections(FILE **fps, char *id, int total, int classes, int w, int h, detection *dets)
 {
- char darknet_path[1024];
- char **names;
- float nms;
- box *boxes;
- float **probs;
- network net;
-}yolo_obj;
-
-void get_detection_info(image im, int num, float thresh, box *boxes, float **probs, int classes, char **names, list *output)
-{
- int i;
-
- for(i=0; i<num; ++i)
+ int i, j;
+ for(i=0; i<total; ++i)
  {
-  int class=max_index(probs[i], classes);
-  float prob=probs[i][class];
-  if(prob>thresh)
+  float xmin=dets[i].bbox.x-dets[i].bbox.w/2.;
+  float xmax=dets[i].bbox.x+dets[i].bbox.w/2.;
+  float ymin=dets[i].bbox.y-dets[i].bbox.h/2.;
+  float ymax=dets[i].bbox.y+dets[i].bbox.h/2.;
+
+  if(xmin<0)
   {
-   box b=boxes[i];
+   xmin=0;
+  }
+  if(ymin<0)
+  {
+   ymin=0;
+  }
+  if(xmax>w)
+  {
+   xmax=w;
+  }
+  if(ymax>h)
+  {
+   ymax=h;
+  }
 
-   int left=(int)(b.x-b.w/2.)*im.w;
-   int right=(int)(b.x+b.w/2.)*im.w;
-   int top=(int)(b.y-b.h/2.)*im.h;
-   int bot=(int)(b.y+b.h/2.)*im.h;
-
-   if(left<0)
+  for(j=0; j<classes; ++j)
+  {
+   if(dets[i].prob[j])
    {
-    left=0;
+    fprintf(fps[j], "%s %f %f %f %f %f\n", id, dets[i].prob[j], xmin, ymin, xmax, ymax);
    }
-   if(right>im.w-1)
-   {
-    right=im.w-1;
-   }
-   if(top<0)
-   {
-    top=0;
-   }
-   if(bot>im.h-1)
-   {
-    bot=im.h-1;
-   }
-
-   detection_info *info=(detection_info *)malloc(sizeof(detection_info));
-   strncpy(info->name, names[class], sizeof(info->name));
-   info->left=left;
-   info->right=right;
-   info->top=top;
-   info->bottom=bot;
-   info->prob=prob;
-   list_insert(output, info);
   }
  }
 }
 
-yolo_handle yolo_init(char *darknet_path, char *datacfg, char *cfgfile, char *weightfile)
+void yolo_cleanup(yolo_object *yolo)
 {
- yolo_obj *obj=(yolo_obj *)malloc(sizeof(yolo_obj));
- if(!obj)
+ free_network(yolo->net);
+ free(yolo->names);
+ free(yolo);
+ yolo_object **ptr_yolo=&yolo;
+ (*ptr_yolo)=NULL;
+}
+
+yolo_object *yolo_init(char *workingDir, char *datacfg, char *cfgfile, char *weightfile)
+{
+ clock_t time=clock();
+
+ yolo_object *yolo=(yolo_object *)malloc(sizeof(yolo_object));
+ if(!yolo)
  {
   return NULL;
  }
- memset(obj, 0, sizeof(yolo_obj));
+ memset(yolo, 0, sizeof(yolo_object));
 
  char cur_dir[1024];
- strncpy(obj->darknet_path, darknet_path, sizeof(obj->darknet_path));
  getcwd(cur_dir, sizeof(cur_dir));
- chdir(darknet_path);
+ if(chdir(workingDir) == -1)
+ {
+  fprintf(stderr, "%s\n", strerror(errno));
+  return NULL;
+ }
+
+ yolo->net=load_network(cfgfile, weightfile, 0);
+
  list *options=read_data_cfg(datacfg);
  char *name_list=option_find_str(options, "names", "data/names.list");
- obj->names=get_labels(name_list);
+ yolo->names=get_labels(name_list);
 
- obj->net=parse_network_cfg(cfgfile);
- if(weightfile)
- {
-  load_weights(&obj->net, weightfile);
- }
- set_batch_network(&obj->net, 1);
+ set_batch_network(yolo->net, 1);
  srand(2222222);
 
- int j;
- obj->nms=.4;
-
- layer l=obj->net.layers[obj->net.n-1];
- obj->boxes=calloc(l.w*l.h*l.n, sizeof(box));
- obj->probs=calloc(l.w*l.h*l.n, sizeof(float *));
- for(j=0; j<l.w*l.h*l.n; ++j)
- {
-  obj->probs[j]=calloc(l.classes+1, sizeof(float *));
- }
+ printf("Network configured and loaded in %f seconds\n", sec(clock()-time));
  chdir(cur_dir);
-
- return (yolo_handle)obj;
+ return yolo;
 }
 
-void yolo_cleanup(yolo_handle handle)
+yolo_detection *yolo_detect(yolo_object *yolo, char *filename, float thresh)
 {
- yolo_obj *obj=(yolo_obj *)handle;
- if(obj)
+ if(yolo == NULL)
  {
-  layer l=obj->net.layers[obj->net.n-1];
-  free(obj->boxes);
-  free_ptrs((void **)obj->probs, l.w*l.h*l.n);
-  free(obj);
+  return NULL;
  }
-}
 
-detection_info **yolo_detect(yolo_handle handle, image im, float thresh, float hier_thresh, int *num)
-{
- yolo_obj *obj=(yolo_obj *)handle;
- image sized=letterbox_image(im, obj->net.w, obj->net.h);
-
- float *X=sized.data;
+ layer l=yolo->net->layers[yolo->net->n-1];
  clock_t time;
- time=clock();
- network_predict(obj->net, X);
- printf("Cam frame predicted in %f seconds.\n", sec(clock()-time));
+ float nms=0.45;
 
- layer l=obj->net.layers[obj->net.n-1];
- get_region_boxes(l, im.w, im.h, obj->net.w, obj->net.h, thresh, obj->probs, obj->boxes, NULL, 0, 0, hier_thresh, 1);
- if(obj->nms)
- {
-  do_nms_obj(obj->boxes, obj->probs, l.w*l.h*l.n, l.classes, obj->nms);
- }
-
- list *output=make_list();
- get_detection_info(im, l.w*l.h*l.n, thresh, obj->boxes, obj->probs, l.classes, obj->names, output);
- detection_info **info=(detection_info **)list_to_array(output);
- *num=output->size;
-
- free_list(output);
- // free_image(im);
- free_image(sized);
-
- return info;
-}
-
-detection_info **yolo_test(yolo_handle handle, char *filename, float thresh, float hier_thresh, int *num, float **feature_map, int *map_size)
-{
- yolo_obj *obj=(yolo_obj *)handle;
-
- char input[256];
- strncpy(input, filename, sizeof(input));
-
- image im=load_image_color(input, 0, 0);
- image sized=letterbox_image(im, obj->net.w, obj->net.h);
-
+ image im=load_image_color(filename, 0, 0);
+ image sized=resize_image(im, yolo->net->w, yolo->net->h);
  float *X=sized.data;
- clock_t time;
  time=clock();
- network_predict(obj->net, X);
- *feature_map=obj->net.output;
- *map_size=obj->net.outputs;
- printf("%s: Predicted in %f seconds.\n", input, sec(clock()-time));
+ network_predict(yolo->net, X);
+ printf("%s: Predicted in %f seconds.\n", filename, sec(clock()-time));
 
- layer l=obj->net.layers[obj->net.n-1];
- get_region_boxes(l, im.w, im.h, obj->net.w, obj->net.h, thresh, obj->probs, obj->boxes, NULL, 0, 0, hier_thresh, 1);
- if(obj->nms)
+ int nboxes=0;
+ detection *dets=get_network_boxes(yolo->net, im.w, im.h, thresh, 0.5, 0, 0, &nboxes);
+ if(nms)
  {
-  do_nms_obj(obj->boxes, obj->probs, l.w*l.h*l.n, l.classes, obj->nms);
+  do_nms_sort(dets, l.side*l.side*l.n, l.classes, nms);
  }
 
- list *output=make_list();
- get_detection_info(im, l.w*l.h*l.n, thresh, obj->boxes, obj->probs, l.classes, obj->names, output);
- detection_info **info=(detection_info **)list_to_array(output);
- *num=output->size;
-
- free_list(output);
  free_image(im);
  free_image(sized);
+#ifdef OPENCV
+ cvWaitKey(0);
+       cvDestroyAllWindows();
+#endif
+ void *obj=calloc(1, sizeof(yolo_detection));
+ if(obj == NULL)
+ {
+  return NULL;
+ }
+ yolo_detection *detec=obj;
+ detec->detection=dets;
+ detec->num_boxes=nboxes;
+ return detec;
+}
 
- return info;
+void yolo_detection_free(yolo_detection **yolo)
+{
+ yolo_detection *detection=(*yolo);
+ free_detections(detection->detection, detection->num_boxes);
+ free(detection);
+ (*yolo)=NULL;
 }

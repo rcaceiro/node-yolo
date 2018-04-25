@@ -1,3 +1,1 @@
-let addons = require('/Users/rcaceiro/CloudStation/IPLeiria/3year/Project/NodeYoloJS/build/Release/nodeyolojs');
-let yolo = new addons.Yolo("./darknet", "cfg/coco.data", "cfg/tiny-yolo.cfg", "../tiny-yolo.weights");
-console.dir(yolo.detect());
+module.exports = require(__dirname + '/build/Release/nodeyolojs').Yolo;

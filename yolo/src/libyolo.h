@@ -1,40 +1,36 @@
 #ifndef LIBYOLO_H
 #define LIBYOLO_H
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include "darknet.h"
-#include "option_list.h"
-#include "image.h"
+#include <unistd.h>
+#include <errno.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef void *yolo_handle;
+typedef struct
+{
+ detection *detection;
+ int num_boxes;
+}yolo_detection;
 
 typedef struct
 {
- char name[32];
- int left;
- int right;
- int top;
- int bottom;
- float prob;
-}detection_info;
+ char **names;
+ float nms;
+ network *net;
+}yolo_object;
 
-yolo_handle yolo_init(char *darknet_path, char *datacfg, char *cfgfile, char *weightfile);
+yolo_object *yolo_init(char *workingDir, char *datacfg, char *cfgfile, char *weightfile);
 
-void yolo_cleanup(yolo_handle handle);
+void yolo_cleanup(yolo_object *yolo);
 
-detection_info **yolo_detect(yolo_handle handle, image im, float thresh, float hier_thresh, int *num);
+yolo_detection *yolo_detect(yolo_object *yolo, char *filename, float thresh);
 
-detection_info **yolo_test(yolo_handle handle, char *filename, float thresh, float hier_thresh, int *num, float **feature_map, int *map_size);
+void yolo_detection_free(yolo_detection **yolo);
 
 #ifdef __cplusplus
-}
+};
 #endif
 
 #endif // LIBYOLO_H

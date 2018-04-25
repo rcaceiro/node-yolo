@@ -1,6 +1,6 @@
 {
  "name": "NodeYoloJS",
- "version": "0.0.1",
+ "version":"1.0.0",
  "description": "NodeJS interface for Yolo/Darknet",
  "keywords": [
   "yolo",
@@ -18,9 +18,11 @@
  "main": "index.js",
  "gypfile": true,
  "scripts": {
-  "preinstall": "make && make clean && node-gyp configure && node-gyp build"
+  "preinstall":"make clean_all && make -j 2 && make clean && node-gyp configure && node-gyp build"
+ },
+ "dependencies":{
  },
  "engines": {
-  "node": ">=8"
+  "node":">=9"
  }
 }
