@@ -1,9 +1,9 @@
-let yolo_addon = require('bindings')('nodeyolojs');
+let yolo_addon = require(__dirname + '/build/Debug/nodeyolojs').Yolo;
 
 // module.exports=yolo_addon.Yolo;
 
 //let obj = new yolo_addon.Yolo("./darknet", "./cfg/coco.data", "./cfg/yolov2-tiny.cfg", "../yolov2-tiny.weights");
-let obj1 = new yolo_addon.Yolo("./darknet", "./cfg/coco.data", "./cfg/yolov3.cfg", "../yolov3-416.weights");
+let obj1 = new yolo_addon("./darknet", "./cfg/coco.data", "./cfg/yolov3.cfg", "../yolov3.weights");
 
 // obj1.detect("darknet/data/horses.jpg")
 //  .then((detections) => {

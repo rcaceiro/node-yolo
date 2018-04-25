@@ -21,7 +21,7 @@
   "preinstall":"make clean_all && make && make clean && node-gyp configure && node-gyp build"
  },
  "dependencies":{
-  "bindings":"^1.3.0"
+  
  },
  "engines": {
   "node": ">=8"
