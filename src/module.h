@@ -4,6 +4,7 @@
 #include <node_api.h>
 #include <cassert>
 #include <libyolo.h>
+#include <queue>
 #include "Queue.h"
 
 class Yolo
@@ -21,7 +22,7 @@ private:
  napi_env env_;
  napi_ref wrapper_;
  yolo_object *yolo;
- Queue<char *> *queue_img_path;
+ std::queue<char *> *queue_img_path;
 
 };
 
