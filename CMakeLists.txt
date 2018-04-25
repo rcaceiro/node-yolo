@@ -13,4 +13,4 @@ INCLUDE_DIRECTORIES(node_modules/node-addon-api/src)
 
 ADD_EXECUTABLE(NodeYoloJS
 			yolo/src/libyolo.h
-			yolo/src/libyolo.c src/module.cpp src/module.cpp src/module.h)
+			yolo/src/libyolo.c src/module.cpp src/module.cpp src/module.h src/Queue.cpp src/Queue.h)
