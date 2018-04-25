@@ -7,7 +7,8 @@
   {
    "target_name":"nodeyolojs",
    "sources":[
-    "src/module.cpp"
+    "src/module.cpp",
+    "src/Queue.cpp"
    ],
    "libraries":[
     "<(module_root_dir)/yolo/libyolo.a"
