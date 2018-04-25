@@ -68,7 +68,7 @@ yolo_object *yolo_init(char *workingDir, char *datacfg, char *cfgfile, char *wei
  yolo->net=load_network(cfgfile, weightfile, 0);
 
  list *options=read_data_cfg(datacfg);
- char *name_list=option_find_str(options, "names", "data/names.list");
+ char *name_list=option_find_str(options, "names", "data/coco.names");
  yolo->names=get_labels(name_list);
 
  set_batch_network(yolo->net, 1);
