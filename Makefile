@@ -10,14 +10,15 @@ endif
 
 #OPENCV=$(shell pkg-config --cflags opencv > /dev/null 2> /dev/null && echo 1 || echo 0)
 OPENMP=0
-DEBUG=0
+DEBUG=1
 
 ARCH= -gencode arch=compute_30,code=sm_30 \
       -gencode arch=compute_35,code=sm_35 \
       -gencode arch=compute_50,code=[sm_50,compute_50] \
       -gencode arch=compute_52,code=[sm_52,compute_52] \
-      -gencode arch=compute_61,code=sm_61
-#      -gencode arch=compute_20,code=[sm_20,sm_21] \ This one is deprecated?
+      -gencode arch=compute_61,code=sm_61 \
+      -gencode arch=compute_62,code=sm_62 \
+      -gencode arch=compute_70,code=sm_70
 
 # This is what I use, uncomment if you know your arch and want to specify
 # ARCH= -gencode arch=compute_52,code=compute_52
@@ -53,7 +54,7 @@ CC=gcc
 NVCC=nvcc
 AR=ar
 ARFLAGS=rcs
-OPTS=-Ofast
+OPTS=
 LDFLAGS= -lm -pthread
 COMMON= -I./darknet/include/ -I./darknet/src/
 CFLAGS=-Wall -Wno-unused-result -Wno-unknown-pragmas -Wfatal-errors -fPIC
@@ -64,6 +65,9 @@ endif
 
 ifeq ($(DEBUG), 1)
 OPTS=-O0 -g
+endif
+ifeq ($(DEBUG), 0)
+OPTS=-Ofast
 endif
 
 CFLAGS+=$(OPTS)
