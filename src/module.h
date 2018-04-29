@@ -2,7 +2,6 @@
 #define NODEYOLOJS_MODULE_H
 
 #include <node_api.h>
-#include <cassert>
 #include <libyolo.h>
 
 class Yolo
@@ -12,9 +11,7 @@ public:
  static void Destructor(napi_env env, void *nativeObject, void *finalize_hint);
 
  void mutex_lock();
-
  void mutex_unlock();
-
  yolo_object *yolo;
 private:
  explicit Yolo(char *working_directory, char *datacfg, char *cfgfile, char *weightfile);
