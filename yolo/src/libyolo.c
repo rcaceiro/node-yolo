@@ -1,5 +1,6 @@
 #include "libyolo.h"
 #include "map_lib.h"
+#include <limits.h>
 
 void yolo_cleanup(yolo_object *yolo)
 {
@@ -41,7 +42,7 @@ yolo_object *yolo_init(char *workingDir, char *datacfg, char *cfgfile, char *wei
  char *classes=option_find_str(options, "classes", "data/names.list");
  char *bad_ptr=NULL;
  long value=strtol(classes, &bad_ptr, 10);
- if(value<INT32_MAX)
+ if(value<INT_MAX)
  {
   yolo->class_number=(int)value;
  }
