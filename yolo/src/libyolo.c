@@ -1,4 +1,3 @@
-#include <darknet/src/cuda.h>
 #include "libyolo.h"
 #include "map_lib.h"
 
