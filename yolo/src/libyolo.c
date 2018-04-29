@@ -1,3 +1,4 @@
+#include <darknet/src/cuda.h>
 #include "libyolo.h"
 #include "map_lib.h"
 
@@ -105,6 +106,15 @@ yolo_detection *parse_detections(yolo_object *yolo, detection *dets, int nboxes,
   bbox=&yolo_dets->detection[i].bbox;
   bbox->x=bbox->x-(bbox->w/2);
   bbox->y=bbox->y-(bbox->h/2);
+
+  if(bbox->x<0)
+  {
+   bbox->x=0;
+  }
+  if(bbox->y<0)
+  {
+   bbox->y=0;
+  }
   i++;
  }
  map_free(map);
