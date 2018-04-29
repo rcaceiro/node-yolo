@@ -4,6 +4,10 @@
 void yolo_cleanup(yolo_object *yolo)
 {
  free_network(yolo->net);
+ for(int i=0; i<yolo->class_number; i++)
+ {
+  free(yolo->names[i]);
+ }
  free(yolo->names);
  free(yolo);
  yolo_object **ptr_yolo=&yolo;
@@ -34,6 +38,14 @@ yolo_object *yolo_init(char *workingDir, char *datacfg, char *cfgfile, char *wei
  char *name_list=option_find_str(options, "names", "data/names.list");
  yolo->names=get_labels(name_list);
 
+ char *classes=option_find_str(options, "classes", "data/names.list");
+ char *bad_ptr=NULL;
+ long value=strtol(classes, &bad_ptr, 10);
+ if(value<INT32_MAX)
+ {
+  yolo->class_number=(int)value;
+ }
+
  set_batch_network(yolo->net, 1);
  srand(2222222);
 
@@ -42,7 +54,7 @@ yolo_object *yolo_init(char *workingDir, char *datacfg, char *cfgfile, char *wei
  return yolo;
 }
 
-yolo_detection *parse_detections(yolo_object *yolo, detection *dets, int nboxes, int classes, float thresh, image im)
+yolo_detection *parse_detections(yolo_object *yolo, detection *dets, int nboxes, int classes, float thresh)
 {
  struct map_t *map=map_create();
  if(map == NULL)
@@ -145,7 +157,7 @@ yolo_detection *yolo_detect(yolo_object *yolo, char *filename, float thresh)
   do_nms_sort(dets, l.side*l.side*l.n, l.classes, nms);
  }
 
- yolo_detection *yolo_detects=parse_detections(yolo, dets, nboxes, l.classes, 0.5, im);
+ yolo_detection *yolo_detects=parse_detections(yolo, dets, nboxes, l.classes, thresh);
 
  free_detections(dets, nboxes);
  free_image(im);

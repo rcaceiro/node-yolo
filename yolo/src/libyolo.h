@@ -23,6 +23,7 @@ typedef struct
 
 typedef struct
 {
+ int class_number;
  char **names;
  float nms;
  network *net;
