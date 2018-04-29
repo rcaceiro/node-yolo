@@ -1,3 +1,6 @@
 [submodule "darknet"]
 	path = darknet
 	url = https://github.com/pjreddie/darknet.git
+[submodule "map_lib"]
+	path = map_lib
+	url = https://github.com/rcaceiro/map_lib.git

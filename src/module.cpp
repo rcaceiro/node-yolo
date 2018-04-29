@@ -1,4 +1,5 @@
 #include "module.h"
+#include <cassert>
 
 napi_status get_string_value(napi_env env, napi_value args[], size_t index, char **value, size_t value_size)
 {
@@ -55,43 +56,28 @@ void load_box_object(napi_env env, box img_box, napi_value jsbox)
 void load_detections(napi_env env, yolo_detection *img_detections, napi_value jsarray)
 {
  napi_status status;
- napi_value jsobj, box_object, classes, prob, objectness, sort_class;
- detection detect;
+ napi_value jsobj, box_object, classes, prob;
+ detect det;
  for(int i=0; i<img_detections->num_boxes; ++i)
  {
-  detect=img_detections->detection[i];
+  det=img_detections->detection[i];
   status=napi_create_object(env, &jsobj);
   assert(status == napi_ok);
   status=napi_set_element(env, jsarray, (uint32_t)i, jsobj);
   assert(status == napi_ok);
-  status=napi_create_int32(env, detect.classes, &classes);
+  status=napi_create_string_utf8(env, det.class_name, strlen(det.class_name), &classes);
   assert(status == napi_ok);
-  status=napi_set_named_property(env, jsobj, "classes", classes);
+  status=napi_set_named_property(env, jsobj, "class_name", classes);
   assert(status == napi_ok);
-  status=napi_create_int32(env, detect.sort_class, &sort_class);
+  status=napi_create_double(env, det.probability, &prob);
   assert(status == napi_ok);
-  status=napi_set_named_property(env, jsobj, "sort_class", sort_class);
-  assert(status == napi_ok);
-  status=napi_create_double(env, detect.objectness, &objectness);
-  assert(status == napi_ok);
-  status=napi_set_named_property(env, jsobj, "objectness", objectness);
+  status=napi_set_named_property(env, jsobj, "probability", prob);
   assert(status == napi_ok);
   status=napi_create_object(env, &box_object);
   assert(status == napi_ok);
   status=napi_set_named_property(env, jsobj, "box", box_object);
   assert(status == napi_ok);
-  load_box_object(env, detect.bbox, box_object);
-  if(detect.prob != nullptr)
-  {
-   status=napi_create_double(env, *detect.prob, &prob);
-  }
-  else
-  {
-   status=napi_get_undefined(env, &prob);
-  }
-  assert(status == napi_ok);
-  status=napi_set_named_property(env, jsobj, "prob", prob);
-  assert(status == napi_ok);
+  load_box_object(env, det.bbox, box_object);
  }
 }
 
@@ -100,18 +86,9 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
  auto *holder=static_cast<data_holder *>(data);
 
  napi_value instance;
- status=napi_create_object(env, &instance);
+ status=napi_create_array_with_length(env, (size_t)holder->img_detection->num_boxes, &instance);
  assert(status == napi_ok);
- napi_value yolo_detections_number, yolo_detections;
- status=napi_create_int32(env, holder->img_detection->num_boxes, &yolo_detections_number);
- assert(status == napi_ok);
- status=napi_create_array_with_length(env, (size_t)holder->img_detection->num_boxes, &yolo_detections);
- assert(status == napi_ok);
- status=napi_set_named_property(env, instance, "detections_number", yolo_detections_number);
- assert(status == napi_ok);
- status=napi_set_named_property(env, instance, "detections", yolo_detections);
- assert(status == napi_ok);
- load_detections(env, holder->img_detection, yolo_detections);
+ load_detections(env, holder->img_detection, instance);
 
  napi_resolve_deferred(env, holder->deferred, instance);
 
