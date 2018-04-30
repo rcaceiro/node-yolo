@@ -67,7 +67,7 @@ void load_detections(napi_env env, yolo_detection *img_detections, napi_value js
   assert(status == napi_ok);
   status=napi_create_string_utf8(env, det.class_name, strlen(det.class_name), &classes);
   assert(status == napi_ok);
-  status=napi_set_named_property(env, jsobj, "class_name", classes);
+  status=napi_set_named_property(env, jsobj, "className", classes);
   assert(status == napi_ok);
   status=napi_create_double(env, det.probability, &prob);
   assert(status == napi_ok);

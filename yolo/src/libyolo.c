@@ -87,17 +87,19 @@ yolo_detection *parse_detections(yolo_object *yolo, detection *dets, int nboxes,
   }
  }
 
- if(map_empty(map))
- {
-  return NULL;
- }
-
  yolo_detection *yolo_dets=calloc(1, sizeof(yolo_detection));
  if(yolo_dets == NULL)
  {
   return NULL;
  }
  yolo_dets->num_boxes=map_size(map);
+
+ if(map_empty(map))
+ {
+  map_free(map);
+  return yolo_dets;
+ }
+
  yolo_dets->detection=calloc((size_t)yolo_dets->num_boxes, sizeof(detect));
  if(yolo_dets->detection == NULL)
  {
