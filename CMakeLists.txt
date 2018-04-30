@@ -10,6 +10,7 @@ INCLUDE_DIRECTORIES(yolo/src)
 INCLUDE_DIRECTORIES(/usr/local/include/node)
 INCLUDE_DIRECTORIES(/usr/include/node)
 INCLUDE_DIRECTORIES(node_modules/node-addon-api/src)
+INCLUDE_DIRECTORIES(map_lib)
 
 ADD_EXECUTABLE(NodeYoloJS
 			yolo/src/libyolo.h
