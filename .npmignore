@@ -1,0 +1,8 @@
+CMakeLists.txt
+*.weights
+*.a
+*.dylib
+darknet/cfg
+darknet/data
+darknet/examples
+darknet/python
