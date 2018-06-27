@@ -11,7 +11,7 @@ It allow you to use a state-of-the-art, real-time object detection system called
 
 ## Installation
 ```sh
-npm install https://github.com/rcaceiro/node-yolo --save
+npm i @vapi/node-yolo --save
 ```
 
 ## How To Use
