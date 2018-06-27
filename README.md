@@ -48,7 +48,7 @@ You need to create two folder, cfg and data and put the files for each one. Like
 |:--------------|:---------------------------------------------------------------
 | `className`   | Name of the class of the object detected
 | `probability` | The higher probability that this className is correct
-| `box`         | obejct that contains box info of the object
+| `box`         | object that contains box info of the object
 
 #### box object
 | **Field**   | **Description**
