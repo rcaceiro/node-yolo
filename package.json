@@ -5,7 +5,13 @@
  "keywords": [
   "yolo",
   "darknet",
-  "recognition"
+  "recognition",
+  "artificial",
+  "inteligence",
+  "AI",
+  "object",
+  "detection",
+  "classification"
  ],
  "homepage":"https://github.com/rcaceiro/NodeYoloJS",
  "bugs": {
@@ -24,5 +30,7 @@
  },
  "engines": {
   "node":">=9"
- }
+ },
+ "author":"Rúben Caceiro<r.caceiro@hotmail.com> & Ricardo Maltez <ricardomaltez@gmail.com>",
+ "license":"MIT"
 }
