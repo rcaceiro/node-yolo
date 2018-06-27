@@ -1,6 +1,6 @@
 {
  "name":"@vapi/node-yolo",
- "version":"1.0.2",
+ "version":"1.0.3",
  "description":"NodeJS interface for Yolo/Darknet",
  "keywords":[
   "yolo",
