@@ -16,16 +16,17 @@ npm install https://github.com/rcaceiro/node-yolo --save
 
 ## How To Use
 **darknet-configs** is a folder where you should put the Yolo [weights](https://pjreddie.com/darknet/yolo/), [cfg](https://github.com/pjreddie/darknet/tree/master/cfg) and [data files](https://github.com/pjreddie/darknet/tree/master/data). 
-You need to create two folder, cfg and data and put the files for each one. Like this
-.
-├── darknet-configs         # The folder for the Yolo weight, cfg and data files
-│   ├── cfg                 # cfg folder
-|          |── coco.data
-|          |── yolov3.cfg
-│   ├── data                # data folder
-|   |      |── coco.names
-│   └── yolov3.weights      # YoloV3 weights file
-└── ...
+You need to create two folder, cfg and data and put the files for each one. Like this:<br/>
+
+    .
+    ├── darknet-configs         # The folder for the Yolo weight, cfg and data files
+    │   ├── cfg                 # cfg folder
+    |          |── coco.data
+    |          |── yolov3.cfg
+    │   ├── data                # data folder
+    |   |      |── coco.names
+    │   └── yolov3.weights      # YoloV3 weights file
+    └── ...
 
 
 
@@ -34,10 +35,10 @@ const yolo = require('node-yolo');
 const detector = new yolo("darknet-configs", "cfg/coco.data", "cfg/yolov3.cfg", "yolov3.weights");
 detector.detect(path)
     .then(detections => {
-        //here you receive the detections
+        // here you receive the detections
     })
     .catch(error => {
-        //here you can handle the errors. Ex: Out of memory
+        // here you can handle the errors. Ex: Out of memory
     });
 ```
 #### detections object
