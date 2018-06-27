@@ -46,8 +46,8 @@ You need to create two folder, cfg and data and put the files for each one. Like
 #### detections object
 | **Field**   | **Description**
 |:--------------|:---------------------------------------------------------------
-| `className`   | Name of the class of the object detected
-| `probability` | The higher probability that this className is correct
+| `className`   | name of the class of the object detected
+| `probability` | the higher probability that this className is correct
 | `box`         | object that contains box info of the object
 
 #### box object
