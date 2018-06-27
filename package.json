@@ -1,8 +1,8 @@
 {
- "name":"node-yolo",
+ "name":"@vapi/node-yolo",
  "version":"1.0.2",
- "description": "NodeJS interface for Yolo/Darknet",
- "keywords": [
+ "description":"NodeJS interface for Yolo/Darknet",
+ "keywords":[
   "yolo",
   "darknet",
   "recognition",
@@ -14,23 +14,22 @@
   "classification"
  ],
  "homepage":"https://github.com/rcaceiro/NodeYoloJS",
- "bugs": {
+ "bugs":{
   "url":"https://github.com/rcaceiro/NodeYoloJS/issues"
  },
- "repository": {
-  "type": "git",
-  "url":"https://github.com/rcaceiro/NodeYoloJS.git"
+ "repository":{
+  "type":"git",
+  "url":"git+https://github.com/rcaceiro/NodeYoloJS.git"
  },
- "main": "index.js",
- "gypfile": true,
- "scripts": {
+ "main":"index.js",
+ "gypfile":true,
+ "scripts":{
   "preinstall":"make clean_all && make -j 2 && make clean && node-gyp configure && node-gyp build"
  },
- "dependencies":{
- },
- "engines": {
+ "dependencies":{},
+ "engines":{
   "node":">=9"
  },
- "author":"Rúben Caceiro<r.caceiro@hotmail.com> & Ricardo Maltez <ricardomaltez@gmail.com>",
+ "author":"Rúben Caceiro <r.caceiro@hotmail.com> & Ricardo Maltez <ricardomaltez@gmail.com>",
  "license":"MIT"
 }
