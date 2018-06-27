@@ -1,30 +1,48 @@
 
 # node-yolo
-This project came out from a computer engineering project [VAPi](https://github.com/freakstatic/vapi-server).
-Our project uses a bleeding edge AI algorithm that classify objects of a certain image called [yolo](https://pjreddie.com/darknet/yolo/).
+This Node.js C++ Addon came out from a computer engineering project, [VAPi](https://github.com/freakstatic/vapi-server).
+It allow you to use a state-of-the-art, real-time object detection system called [Yolo](https://pjreddie.com/darknet/yolo/).
 
 ### Pre-requirements
-* C/C++
-* CUDA (If you want to use GPU accelaration, only nVidia)
-* [nodeJS](https://nodejs.org/en/)>=8
+* C/C++ Compiler
+* Nvidia graphic card with [CUDA](https://developer.nvidia.com/cuda-downloads) support and required files installed (Only if you want to use GPU acceleration)
+* [Node.js](https://nodejs.org/en/) >= 8
 * [node-gyp](https://www.npmjs.com/package/node-gyp)
 
 ## Installation
 ```sh
-npm install https://github.com/rcaceiro/node-yolo --save
+npm i @vapi/node-yolo --save
 ```
 
 ## How To Use
-**darknet-configs** is a folder where you should put the weight files and you most create inside of it another called cfg where put the config files.
+
 ```javascript
 const yolo = require('node-yolo');
 const detector = new yolo("darknet-configs", "cfg/coco.data", "cfg/yolov3.cfg", "yolov3.weights");
 detector.detect(path)
-        .then(detections => {
-        })
-        .catch(error => {
-        });
+    .then(detections => {
+        // here you receive the detections
+    })
+    .catch(error => {
+        // here you can handle the errors. Ex: Out of memory
+    });
 ```
+**darknet-configs** is a folder where you should put the Yolo [weights](https://pjreddie.com/darknet/yolo/), [cfg](https://github.com/pjreddie/darknet/tree/master/cfg) and [data files](https://github.com/pjreddie/darknet/tree/master/data). 
+You need to create two folder, cfg and data and put the files for each one. Like this:<br/>
+
+    .
+    ├── darknet-configs         # The folder for the Yolo weight, cfg and data files
+    │   ├── cfg                 # cfg folder
+    |          |── coco.data
+    |          |── yolov3.cfg
+    │   ├── data                # data folder
+    |   |      |── coco.names
+    │   └── yolov3.weights      # YoloV3 weights file
+    └── ...
+
+
+
+
 #### detections object
 | **Field**   | **Description**
 |:--------------|:---------------------------------------------------------------
