@@ -17,7 +17,7 @@ npm i @vapi/node-yolo --save
 ## How To Use
 
 ```javascript
-const yolo = require('node-yolo');
+const yolo = require('@vapi/node-yolo');
 const detector = new yolo("darknet-configs", "cfg/coco.data", "cfg/yolov3.cfg", "yolov3.weights");
 detector.detect(path)
     .then(detections => {
