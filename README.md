@@ -17,7 +17,7 @@ npm i @vapi/node-yolo --save
 ## How To Use
 
 ```javascript
-const yolo = require('node-yolo');
+const yolo = require('@vapi/node-yolo');
 const detector = new yolo("darknet-configs", "cfg/coco.data", "cfg/yolov3.cfg", "yolov3.weights");
 detector.detect(path)
     .then(detections => {
@@ -46,9 +46,9 @@ You need to create two folder, cfg and data and put the files for each one. Like
 #### detections object
 | **Field**   | **Description**
 |:--------------|:---------------------------------------------------------------
-| `className`   | Name of the class of the object detected
-| `probability` | The higher probability that this className is correct
-| `box`         | obejct that contains box info of the object
+| `className`   | name of the class of the object detected
+| `probability` | the higher probability that this className is correct
+| `box`         | object that contains box info of the object
 
 #### box object
 | **Field**   | **Description**
