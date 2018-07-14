@@ -259,41 +259,61 @@ void yolo_detection_free(yolo_detection **yolo)
 
 yolo_status_detailed yolo_status_decode(yolo_status status)
 {
+ yolo_status_detailed status_detailed;
+ status_detailed.error_code=status;
  switch(status)
  {
   case yolo_cannot_alloc_detect:
-   return {.error_code=yolo_cannot_alloc_detect, .error_message="Cannot allocate detect in memory"};
+   status_detailed.error_message="Cannot allocate detect in memory";
+   break;
   case yolo_cannot_alloc_yolo_detection:
-   return {.error_code=yolo_cannot_alloc_yolo_detection, .error_message="Cannot allocate yolo_detection in memory"};
+   status_detailed.error_message="Cannot allocate yolo_detection in memory";
+   break;
   case yolo_cannot_alloc_node_yolo_object:
-   return {.error_code=yolo_cannot_alloc_node_yolo_object, .error_message="Cannot allocate node_yolo_object in memory"};
+   status_detailed.error_message="Cannot allocate node_yolo_object in memory";
+   break;
   case yolo_cannot_alloc_map:
-   return {.error_code=yolo_cannot_alloc_map, .error_message="Cannot allocate map in memory"};
+   status_detailed.error_message="Cannot allocate map in memory";
+   break;
   case yolo_cannot_change_to_working_dir:
-   return {.error_code=yolo_cannot_change_to_working_dir, .error_message="Cannot change to working directory"};
+   status_detailed.error_message="Cannot change to working directory";
+   break;
   case yolo_object_is_not_initialized:
-   return {.error_code=yolo_object_is_not_initialized, .error_message="yolo_object isn't allocated in memory"};
+   status_detailed.error_message="yolo_object isn't allocated in memory";
+   break;
   case yolo_working_dir_is_not_exists:
-   return {.error_code=yolo_working_dir_is_not_exists, .error_message="working directory don't exists"};
+   status_detailed.error_message="working directory don't exists";
+   break;
   case yolo_datacfg_is_not_exists:
-   return {.error_code=yolo_datacfg_is_not_exists, .error_message="datacfg don't exists"};
+   status_detailed.error_message="datacfg don't exists";
+   break;
   case yolo_cfgfile_is_not_exists:
-   return {.error_code=yolo_cfgfile_is_not_exists, .error_message="cfgfile don't exists"};
+   status_detailed.error_message="cfgfile don't exists";
+   break;
   case yolo_weight_file_is_not_exists:
-   return {.error_code=yolo_weight_file_is_not_exists, .error_message="weight file don't exists"};
+   status_detailed.error_message="weight file don't exists";
+   break;
   case yolo_working_dir_is_not_readable:
-   return {.error_code=yolo_working_dir_is_not_readable, .error_message="working directory isn't readable"};
+   status_detailed.error_message="working directory isn't readable";
+   break;
   case yolo_datacfg_is_not_readable:
-   return {.error_code=yolo_datacfg_is_not_readable, .error_message="datacfg isn't readable"};
+   status_detailed.error_message="datacfg isn't readable";
+   break;
   case yolo_cfgfile_is_not_readable:
-   return {.error_code=yolo_cfgfile_is_not_readable, .error_message="cfgfile isn't readable"};
+   status_detailed.error_message="cfgfile isn't readable";
+   break;
   case yolo_weight_file_is_not_readable:
-   return {.error_code=yolo_weight_file_is_not_readable, .error_message="weight file isn't readable"};
+   status_detailed.error_message="weight file isn't readable";
+   break;
   case yolo_names_file_is_not_exists:
-   return {.error_code=yolo_names_file_is_not_exists, .error_message="names file don't exists"};
+   status_detailed.error_message="names file don't exists";
+   break;
   case yolo_names_file_is_not_readable:
-   return {.error_code=yolo_names_file_is_not_readable, .error_message="names file isn't readable"};
+   status_detailed.error_message="names file isn't readable";
+   break;
   default:
-   return NULL;
+   status_detailed.error_code=-1;
+   status_detailed.error_message="Unknow error";
  }
+ return status_detailed;
 }
