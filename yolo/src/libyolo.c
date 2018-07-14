@@ -15,30 +15,90 @@ void yolo_cleanup(yolo_object *yolo)
  (*ptr_yolo)=NULL;
 }
 
-yolo_object *yolo_init(char *workingDir, char *datacfg, char *cfgfile, char *weightfile)
+yolo_status yolo_init(yolo_object **yolo_obj, char *workingDir, char *datacfg, char *cfgfile, char *weightfile)
 {
  clock_t time=clock();
 
- yolo_object *yolo=(yolo_object *)malloc(sizeof(yolo_object));
+ if((*yolo_obj) == NULL)
+ {
+  yolo_cleanup(*yolo_obj);
+ }
+
+ (*yolo_obj)=(yolo_object *)malloc(sizeof(yolo_object));
+ yolo_object *yolo=(*yolo_obj);
+
  if(!yolo)
  {
-  return NULL;
+  return yolo_cannot_alloc_node_yolo_object;
  }
  memset(yolo, 0, sizeof(yolo_object));
 
+ if(access(workingDir, F_OK) == -1)
+ {
+  fprintf(stderr, "error yolo_init: %s\n", strerror(errno));
+  return yolo_working_dir_is_not_exists;
+ }
+
+ if(access(workingDir, R_OK) == -1)
+ {
+  fprintf(stderr, "error yolo_init: %s\n", strerror(errno));
+  return yolo_working_dir_is_not_readable;
+ }
  char cur_dir[1024];
  getcwd(cur_dir, sizeof(cur_dir));
  if(chdir(workingDir) == -1)
  {
   fprintf(stderr, "%s\n", strerror(errno));
-  return NULL;
+  return yolo_cannot_change_to_working_dir;
  }
 
+ if(access(cfgfile, F_OK) == -1)
+ {
+  fprintf(stderr, "error yolo_init: %s\n", strerror(errno));
+  return yolo_cfgfile_is_not_exists;
+ }
+ if(access(cfgfile, R_OK) == -1)
+ {
+  fprintf(stderr, "error yolo_init: %s\n", strerror(errno));
+  return yolo_cfgfile_is_not_readable;
+ }
+ if(access(weightfile, F_OK) == -1)
+ {
+  fprintf(stderr, "error yolo_init: %s\n", strerror(errno));
+  return yolo_weight_file_is_not_exists;
+ }
+ if(access(weightfile, R_OK) == -1)
+ {
+  fprintf(stderr, "error yolo_init: %s\n", strerror(errno));
+  return yolo_weight_file_is_not_readable;
+ }
  yolo->net=load_network(cfgfile, weightfile, 0);
+
+ if(access(datacfg, F_OK) == -1)
+ {
+  fprintf(stderr, "error yolo_init: %s\n", strerror(errno));
+  return yolo_datacfg_is_not_exists;
+ }
+
+ if(access(datacfg, R_OK) == -1)
+ {
+  fprintf(stderr, "error yolo_init: %s\n", strerror(errno));
+  return yolo_datacfg_is_not_readable;
+ }
  list *options=read_data_cfg(datacfg);
  char *name_list=option_find_str(options, "names", "data/names.list");
- yolo->names=get_labels(name_list);
 
+ if(access(name_list, F_OK) == -1)
+ {
+  fprintf(stderr, "error yolo_init: %s\n", strerror(errno));
+  return yolo_names_file_is_not_exists;
+ }
+ if(access(name_list, R_OK) == -1)
+ {
+  fprintf(stderr, "error yolo_init: %s\n", strerror(errno));
+  return yolo_names_file_is_not_readable;
+ }
+ yolo->names=get_labels(name_list);
  char *classes=option_find_str(options, "classes", "data/names.list");
  char *bad_ptr=NULL;
  long value=strtol(classes, &bad_ptr, 10);
@@ -52,16 +112,15 @@ yolo_object *yolo_init(char *workingDir, char *datacfg, char *cfgfile, char *wei
 
  printf("Network configured and loaded in %f seconds\n", sec(clock()-time));
  chdir(cur_dir);
- return yolo;
+ return yolo_ok;
 }
 
-yolo_detection *parse_detections(yolo_object *yolo, detection *dets, int nboxes, int classes, float thresh)
+yolo_status parse_detections(yolo_object *yolo, detection *dets, yolo_detection **yolo_detect, int nboxes, int classes, float thresh)
 {
  struct map_t *map=map_create();
  if(map == NULL)
  {
-  fprintf(stderr, "Cannot allocate map in memory");
-  return NULL;
+  return yolo_cannot_alloc_map;
  }
  int class_index;
  detection *det;
@@ -87,23 +146,25 @@ yolo_detection *parse_detections(yolo_object *yolo, detection *dets, int nboxes,
   }
  }
 
- yolo_detection *yolo_dets=calloc(1, sizeof(yolo_detection));
- if(yolo_dets == NULL)
+ (*yolo_detect)=calloc(1, sizeof(yolo_detection));
+ if((*yolo_detect) == NULL)
  {
-  return NULL;
+  return yolo_cannot_alloc_yolo_detection;
  }
- yolo_dets->num_boxes=map_size(map);
+ memset((*yolo_detect), 0, sizeof(yolo_detection));
+ yolo_detection *yolo_dets=(*yolo_detect);
 
  if(map_empty(map))
  {
   map_free(map);
-  return yolo_dets;
+  return yolo_ok;
  }
+ yolo_dets->num_boxes=map_size(map);
 
  yolo_dets->detection=calloc((size_t)yolo_dets->num_boxes, sizeof(detect));
  if(yolo_dets->detection == NULL)
  {
-  return NULL;
+  return yolo_cannot_alloc_detect;
  }
 
  int i=0;
@@ -132,20 +193,31 @@ yolo_detection *parse_detections(yolo_object *yolo, detection *dets, int nboxes,
   i++;
  }
  map_free(map);
- return yolo_dets;
+ return yolo_ok;
 }
 
-yolo_detection *yolo_detect(yolo_object *yolo, char *filename, float thresh)
+yolo_status yolo_detect(yolo_object *yolo, yolo_detection **detect, char *filename, float thresh)
 {
  if(yolo == NULL)
  {
-  return NULL;
+  return yolo_object_is_not_initialized;
  }
 
  layer l=yolo->net->layers[yolo->net->n-1];
  clock_t time;
  float nms=0.45;
 
+ if(access(filename, F_OK) == -1)
+ {
+  fprintf(stderr, "error yolo_detect: %s\n", strerror(errno));
+  return yolo_image_file_is_not_exists;
+ }
+
+ if(access(filename, R_OK) == -1)
+ {
+  fprintf(stderr, "error yolo_detect: %s\n", strerror(errno));
+  return yolo_image_file_is_not_readable;
+ }
  image im=load_image_color(filename, 0, 0);
  image sized=resize_image(im, yolo->net->w, yolo->net->h);
  float *X=sized.data;
@@ -160,17 +232,17 @@ yolo_detection *yolo_detect(yolo_object *yolo, char *filename, float thresh)
   do_nms_sort(dets, l.side*l.side*l.n, l.classes, nms);
  }
 
- yolo_detection *yolo_detects=parse_detections(yolo, dets, nboxes, l.classes, thresh);
+ yolo_status status=parse_detections(yolo, dets, detect, nboxes, l.classes, thresh);
+ if(status != yolo_ok)
+ {
+  return status;
+ }
 
  free_detections(dets, nboxes);
  free_image(im);
  free_image(sized);
-#ifdef OPENCV
- cvWaitKey(0);
-       cvDestroyAllWindows();
-#endif
 
- return yolo_detects;
+ return yolo_ok;
 }
 
 void yolo_detection_free(yolo_detection **yolo)
@@ -183,4 +255,45 @@ void yolo_detection_free(yolo_detection **yolo)
  free(yolo_det->detection);
  free(yolo_det);
  (*yolo)=NULL;
+}
+
+yolo_status_detailed yolo_status_decode(yolo_status status)
+{
+ switch(status)
+ {
+  case yolo_cannot_alloc_detect:
+   return {.error_code=yolo_cannot_alloc_detect, .error_message="Cannot allocate detect in memory"};
+  case yolo_cannot_alloc_yolo_detection:
+   return {.error_code=yolo_cannot_alloc_yolo_detection, .error_message="Cannot allocate yolo_detection in memory"};
+  case yolo_cannot_alloc_node_yolo_object:
+   return {.error_code=yolo_cannot_alloc_node_yolo_object, .error_message="Cannot allocate node_yolo_object in memory"};
+  case yolo_cannot_alloc_map:
+   return {.error_code=yolo_cannot_alloc_map, .error_message="Cannot allocate map in memory"};
+  case yolo_cannot_change_to_working_dir:
+   return {.error_code=yolo_cannot_change_to_working_dir, .error_message="Cannot change to working directory"};
+  case yolo_object_is_not_initialized:
+   return {.error_code=yolo_object_is_not_initialized, .error_message="yolo_object isn't allocated in memory"};
+  case yolo_working_dir_is_not_exists:
+   return {.error_code=yolo_working_dir_is_not_exists, .error_message="working directory don't exists"};
+  case yolo_datacfg_is_not_exists:
+   return {.error_code=yolo_datacfg_is_not_exists, .error_message="datacfg don't exists"};
+  case yolo_cfgfile_is_not_exists:
+   return {.error_code=yolo_cfgfile_is_not_exists, .error_message="cfgfile don't exists"};
+  case yolo_weight_file_is_not_exists:
+   return {.error_code=yolo_weight_file_is_not_exists, .error_message="weight file don't exists"};
+  case yolo_working_dir_is_not_readable:
+   return {.error_code=yolo_working_dir_is_not_readable, .error_message="working directory isn't readable"};
+  case yolo_datacfg_is_not_readable:
+   return {.error_code=yolo_datacfg_is_not_readable, .error_message="datacfg isn't readable"};
+  case yolo_cfgfile_is_not_readable:
+   return {.error_code=yolo_cfgfile_is_not_readable, .error_message="cfgfile isn't readable"};
+  case yolo_weight_file_is_not_readable:
+   return {.error_code=yolo_weight_file_is_not_readable, .error_message="weight file isn't readable"};
+  case yolo_names_file_is_not_exists:
+   return {.error_code=yolo_names_file_is_not_exists, .error_message="names file don't exists"};
+  case yolo_names_file_is_not_readable:
+   return {.error_code=yolo_names_file_is_not_readable, .error_message="names file isn't readable"};
+  default:
+   return NULL;
+ }
 }
