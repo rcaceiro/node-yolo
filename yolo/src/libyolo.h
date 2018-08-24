@@ -38,6 +38,7 @@ typedef struct
 typedef enum
 {
  yolo_ok,
+ yolo_instanciation,
  yolo_cannot_alloc_node_yolo_object,
  yolo_cannot_alloc_map,
  yolo_cannot_alloc_yolo_detection,
@@ -56,6 +57,25 @@ typedef enum
  yolo_names_file_is_not_readable,
  yolo_image_file_is_not_exists,
  yolo_image_file_is_not_readable,
+
+ yolo_napi_create_array_failed,
+ yolo_napi_create_object_failed,
+ yolo_napi_set_object_to_array_failed,
+ yolo_napi_create_class_name_string_failed,
+ yolo_napi_set_class_name_property_failed,
+ yolo_napi_create_probability_double_failed,
+ yolo_napi_set_probability_property_failed,
+ yolo_napi_create_box_object_failed,
+ yolo_napi_set_box_property_failed,
+
+ yolo_napi_create_box_x_double_failed,
+ yolo_napi_create_box_x_named_property_failed,
+ yolo_napi_create_box_y_double_failed,
+ yolo_napi_create_box_y_named_property_failed,
+ yolo_napi_create_box_w_double_failed,
+ yolo_napi_create_box_w_named_property_failed,
+ yolo_napi_create_box_h_double_failed,
+ yolo_napi_create_box_h_named_property_failed,
 }yolo_status;
 
 yolo_status yolo_init(yolo_object **yolo_obj, char *workingDir, char *datacfg, char *cfgfile, char *weightfile);
