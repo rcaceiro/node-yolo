@@ -31,29 +31,58 @@ napi_status get_string_value(napi_env env, napi_value args[], size_t index, char
  return napi_ok;
 }
 
-void load_box_object(napi_env env, box img_box, napi_value jsbox)
+yolo_status load_box_object(napi_env env, box img_box, napi_value jsbox)
 {
  napi_status status;
  napi_value x, y, w, h;
+
  status=napi_create_double(env, img_box.x, &x);
- assert(status == napi_ok);
+ if(status != napi_ok)
+ {
+  return yolo_napi_create_box_x_double_failed;
+ }
  status=napi_set_named_property(env, jsbox, "x", x);
- assert(status == napi_ok);
+ if(status != napi_ok)
+ {
+  return yolo_napi_create_box_x_named_property_failed;
+ }
+
  status=napi_create_double(env, img_box.y, &y);
- assert(status == napi_ok);
+ if(status != napi_ok)
+ {
+  return yolo_napi_create_box_y_double_failed;
+ }
  status=napi_set_named_property(env, jsbox, "y", y);
- assert(status == napi_ok);
+ if(status != napi_ok)
+ {
+  return yolo_napi_create_box_y_named_property_failed;
+ }
+
  status=napi_create_double(env, img_box.w, &w);
- assert(status == napi_ok);
+ if(status != napi_ok)
+ {
+  return yolo_napi_create_box_w_double_failed;
+ }
  status=napi_set_named_property(env, jsbox, "w", w);
- assert(status == napi_ok);
+ if(status != napi_ok)
+ {
+  return yolo_napi_create_box_w_named_property_failed;
+ }
+
  status=napi_create_double(env, img_box.h, &h);
- assert(status == napi_ok);
+ if(status != napi_ok)
+ {
+  return yolo_napi_create_box_h_double_failed;
+ }
  status=napi_set_named_property(env, jsbox, "h", h);
- assert(status == napi_ok);
+ if(status != napi_ok)
+ {
+  return yolo_napi_create_box_h_named_property_failed;
+ }
+ return yolo_ok;
 }
 
-void load_detections(napi_env env, yolo_detection *img_detections, napi_value jsarray)
+yolo_status load_detections(napi_env env, yolo_detection *img_detections, napi_value jsarray)
 {
  napi_status status;
  napi_value jsobj, box_object, classes, prob;
@@ -62,35 +91,95 @@ void load_detections(napi_env env, yolo_detection *img_detections, napi_value js
  {
   det=img_detections->detection[i];
   status=napi_create_object(env, &jsobj);
-  assert(status == napi_ok);
-  status=napi_set_element(env, jsarray, (uint32_t)i, jsobj);
-  assert(status == napi_ok);
+  if(status != napi_ok)
+  {
+   return yolo_napi_create_object_failed;
+  }
+
   status=napi_create_string_utf8(env, det.class_name, strlen(det.class_name), &classes);
-  assert(status == napi_ok);
+  if(status != napi_ok)
+  {
+   return yolo_napi_create_class_name_string_failed;
+  }
   status=napi_set_named_property(env, jsobj, "className", classes);
-  assert(status == napi_ok);
+  if(status != napi_ok)
+  {
+   return yolo_napi_set_class_name_property_failed;
+  }
+
   status=napi_create_double(env, det.probability, &prob);
-  assert(status == napi_ok);
+  if(status != napi_ok)
+  {
+   return yolo_napi_create_probability_double_failed;
+  }
   status=napi_set_named_property(env, jsobj, "probability", prob);
-  assert(status == napi_ok);
+  if(status != napi_ok)
+  {
+   return yolo_napi_set_probability_property_failed;
+  }
+
   status=napi_create_object(env, &box_object);
-  assert(status == napi_ok);
+  if(status != napi_ok)
+  {
+   return yolo_napi_create_box_object_failed;
+  }
   status=napi_set_named_property(env, jsobj, "box", box_object);
-  assert(status == napi_ok);
-  load_box_object(env, det.bbox, box_object);
+  if(status != napi_ok)
+  {
+   return yolo_napi_set_box_property_failed;
+  }
+
+  if(load_box_object(env, det.bbox, box_object) == yolo_ok)
+  {
+   status=napi_set_element(env, jsarray, (uint32_t)i, jsobj);
+   if(status != napi_ok)
+   {
+    return yolo_napi_set_object_to_array_failed;
+   }
+  }
  }
+ return yolo_ok;
 }
 
 void complete_async_detect(napi_env env, napi_status status, void *data)
 {
  auto *holder=static_cast<data_holder *>(data);
-
  napi_value instance;
+ yolo_status yolo_stats=yolo_ok;
  status=napi_create_array_with_length(env, (size_t)holder->img_detection->num_boxes, &instance);
- assert(status == napi_ok);
- load_detections(env, holder->img_detection, instance);
+ if(status != napi_ok)
+ {
+  yolo_stats=yolo_napi_create_array_failed;
+ }
 
- napi_resolve_deferred(env, holder->deferred, instance);
+ if(yolo_stats == yolo_ok)
+ {
+  yolo_stats=load_detections(env, holder->img_detection, instance);
+ }
+
+ if(yolo_stats == yolo_ok)
+ {
+  napi_resolve_deferred(env, holder->deferred, instance);
+ }
+ else
+ {
+  napi_value error;
+  yolo_status_detailed status_detailed=yolo_status_decode(yolo_stats);
+  if(napi_create_object(env, &error) == napi_ok)
+  {
+   napi_value string_error;
+   if(napi_create_string_utf8(env, status_detailed.error_message, strlen(status_detailed.error_message), &string_error) == napi_ok)
+   {
+    napi_set_named_property(env, error, "errorMessage", string_error);
+   }
+   napi_value error_code;
+   if(napi_create_int32(env, status_detailed.error_code, &error_code) == napi_ok)
+   {
+    napi_set_named_property(env, error, "errorCode", error_code);
+   }
+  }
+  napi_reject_deferred(env, holder->deferred, error);
+ }
 
  yolo_detection_free(&holder->img_detection);
  napi_async_work work=holder->work;
@@ -104,17 +193,29 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
 void async_detect(napi_env env, void *data)
 {
  auto *holder=static_cast<data_holder *>(data);
- holder->yolo->mutex_lock();
- holder->img_detection=yolo_detect(holder->yolo->yolo, holder->image_path, 0.50);
- holder->yolo->mutex_unlock();
+ if(holder->yolo->created)
+ {
+  holder->yolo->mutex_lock();
+  holder->yolo_stats=yolo_detect(holder->yolo->yolo, &holder->img_detection, holder->image_path, 0.50);
+  holder->yolo->mutex_unlock();
+ }
+ else
+ {
+  holder->yolo_stats=yolo_instanciation;
+ }
 }
 
 napi_ref Yolo::constructor;
 
 Yolo::Yolo(char *working_directory, char *datacfg, char *cfgfile, char *weightfile) : env_(nullptr), wrapper_(nullptr)
 {
+ yolo_status yolo_stats=yolo_init(&this->yolo, working_directory, datacfg, cfgfile, weightfile);
+ if(yolo_stats != yolo_ok)
+ {
+  this->created=false;
+ }
  pthread_mutex_init(&this->mutex, nullptr);
- this->yolo=yolo_init(working_directory, datacfg, cfgfile, weightfile);
+ this->created=true;
 }
 
 Yolo::~Yolo()
@@ -173,11 +274,9 @@ napi_value Yolo::New(napi_env env, napi_callback_info info)
   get_string_value(env, args, 2, &cfgfile, 0);
   get_string_value(env, args, 3, &weightfile, 0);
 
-  auto *obj=new Yolo(darknet_path, datacfg, cfgfile, weightfile);
-
+  auto obj=new Yolo(darknet_path, datacfg, cfgfile, weightfile);
   obj->env_=env;
-  status=napi_wrap(env, jsthis, reinterpret_cast<void *>(obj), Yolo::Destructor, nullptr,  // finalize_hint
-                   &obj->wrapper_);
+  status=napi_wrap(env, jsthis, reinterpret_cast<void *>(obj), Yolo::Destructor, nullptr, &obj->wrapper_);
   assert(status == napi_ok);
 
   return jsthis;
@@ -215,7 +314,12 @@ napi_value Yolo::Detect(napi_env env, napi_callback_info info)
  napi_value args[1];
 
  status=napi_get_cb_info(env, info, &argc, args, &jsthis, nullptr);
- assert(status == napi_ok);
+ if(status != napi_ok)
+ {
+  napi_throw_error(env, "00", "Cannot get arguments");
+  return nullptr;
+ }
+
  if(argc<1)
  {
   napi_throw_error(env, "01", "You have to pass the path to image as parameter");
@@ -262,6 +366,7 @@ napi_value Yolo::Detect(napi_env env, napi_callback_info info)
  assert(status == napi_ok);
  status=napi_queue_async_work(env, holder->work);
  assert(status == napi_ok);
+
  return promise;
 }
 
@@ -275,4 +380,4 @@ void Yolo::mutex_unlock()
  pthread_mutex_unlock(&this->mutex);
 }
 
-NAPI_MODULE(NodeYoloJS, Yolo::Init);
+NAPI_MODULE(NodeYolo, Yolo::Init);
