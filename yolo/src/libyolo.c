@@ -263,6 +263,9 @@ yolo_status_detailed yolo_status_decode(yolo_status status)
  status_detailed.error_code=status;
  switch(status)
  {
+  case yolo_instanciation:
+   status_detailed.error_message="Cannot instantiate due an error.";
+   break;
   case yolo_cannot_alloc_detect:
    status_detailed.error_message="Cannot allocate detect in memory";
    break;
