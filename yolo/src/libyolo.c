@@ -1,5 +1,6 @@
 #include "libyolo.h"
 #include "map_lib.h"
+#include <limits.h>
 
 void yolo_cleanup(yolo_object *yolo)
 {
