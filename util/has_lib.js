@@ -66,10 +66,10 @@ function hasSystemLib(lib) {
  * @return Boolean exists
  */
 function hasLdconfig() {
-    if (os.platform()=='win32') {
-        return false
-    }
     try {
+        if (os.platform()=='win32') {
+            return false
+        }
         // Add /sbin to path as ldconfig is located there on some systems -- e.g.
         // Debian (and it can still be used by unprivileged users):
         childProcess.execSync('export PATH="$PATH:/sbin"')
