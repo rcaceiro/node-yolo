@@ -1,6 +1,5 @@
 #include "libyolo.h"
 #include "map_lib.h"
-#include <limits.h>
 
 void yolo_cleanup(yolo_object *yolo)
 {
@@ -19,14 +18,14 @@ yolo_status yolo_init(yolo_object **yolo_obj, char *workingDir, char *datacfg, c
 {
  clock_t time=clock();
 
- if((*yolo_obj) == NULL)
+ if((*yolo_obj) != NULL)
  {
-  yolo_cleanup(*yolo_obj);
+  yolo_cleanup((*yolo_obj));
  }
 
  (*yolo_obj)=(yolo_object *)malloc(sizeof(yolo_object));
- yolo_object *yolo=(*yolo_obj);
 
+ yolo_object *yolo=(*yolo_obj);
  if(!yolo)
  {
   return yolo_cannot_alloc_node_yolo_object;
