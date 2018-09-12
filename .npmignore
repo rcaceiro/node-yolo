@@ -10,3 +10,4 @@ darknet/examples
 darknet/python
 vapi-node-yolo-1.0.3.tgz
 cmake-build-debug/
+node_modules/
