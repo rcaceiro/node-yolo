@@ -4,12 +4,22 @@
 
 void yolo_cleanup(yolo_object *yolo)
 {
+ if(yolo == NULL)
+ {
+  return;
+ }
  free_network(yolo->net);
  for(int i=0; i<yolo->class_number; i++)
  {
-  free(yolo->names[i]);
+  if(yolo->names[i] != NULL)
+  {
+   free(yolo->names[i]);
+  }
  }
- free(yolo->names);
+ if(yolo->names != NULL)
+ {
+  free(yolo->names);
+ }
  free(yolo);
  yolo_object **ptr_yolo=&yolo;
  (*ptr_yolo)=NULL;
@@ -19,10 +29,7 @@ yolo_status yolo_init(yolo_object **yolo_obj, char *workingDir, char *datacfg, c
 {
  clock_t time=clock();
 
- if((*yolo_obj) != NULL)
- {
-  yolo_cleanup((*yolo_obj));
- }
+ yolo_cleanup((*yolo_obj));
 
  (*yolo_obj)=(yolo_object *)malloc(sizeof(yolo_object));
 
