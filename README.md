@@ -8,6 +8,7 @@ It allow you to use a state-of-the-art, real-time object detection system called
 * Nvidia graphic card with [CUDA](https://developer.nvidia.com/cuda-downloads) support and required files installed (Only if you want to use GPU acceleration)
 * [Node.js](https://nodejs.org/en/) >= 9
 * [node-gyp](https://www.npmjs.com/package/node-gyp)
+* [ImageMagick](https://www.imagemagick.org/)
 
 ## Installation
 ```sh
