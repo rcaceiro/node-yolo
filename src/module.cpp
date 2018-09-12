@@ -192,6 +192,7 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
 
 void async_detect(napi_env env, void *data)
 {
+ (void)env;
  auto *holder=static_cast<data_holder *>(data);
  if(holder->yolo->created)
  {
@@ -209,6 +210,7 @@ napi_ref Yolo::constructor;
 
 Yolo::Yolo(char *working_directory, char *datacfg, char *cfgfile, char *weightfile) : env_(nullptr), wrapper_(nullptr)
 {
+ this->yolo=nullptr;
  yolo_status yolo_stats=yolo_init(&this->yolo, working_directory, datacfg, cfgfile, weightfile);
  if(yolo_stats != yolo_ok)
  {
@@ -227,6 +229,7 @@ Yolo::~Yolo()
 
 void Yolo::Destructor(napi_env env, void *nativeObject, void * /*finalize_hint*/)
 {
+ (void)env
  reinterpret_cast<Yolo *>(nativeObject)->~Yolo();
 }
 
