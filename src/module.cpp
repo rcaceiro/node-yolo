@@ -229,7 +229,7 @@ Yolo::~Yolo()
 
 void Yolo::Destructor(napi_env env, void *nativeObject, void * /*finalize_hint*/)
 {
- (void)env
+ (void)env;
  reinterpret_cast<Yolo *>(nativeObject)->~Yolo();
 }
 
