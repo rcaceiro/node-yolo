@@ -38,18 +38,6 @@
    },
    "conditions":[
     [
-	'with_opencv=="true"',
-	{
-	 "defines":[
-	  "OPENCV"
-	 ],
-	 "libraries":[
-	  "-lopencv_core",
-	  "-lopencv_highgui"
-	 ]
-	}
-    ],
-    [
 	'with_cuda=="true"',
 	{
 	 "defines":[
