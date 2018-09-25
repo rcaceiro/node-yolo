@@ -45,6 +45,7 @@
 	 ],
 	 "libraries":[
 	  "-L/usr/local/cuda/lib64",
+	  "-L/usr/lib/x86_64-linux-gnu/"
 	  "-lcuda",
 	  "-lcudart",
 	  "-lcublas",
