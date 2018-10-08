@@ -1,34 +1,13 @@
-const YoloModule = require(__dirname + '/build/Release/nodeyolojs').Yolo;
-const imagemagick = require('imagickal');
+//module.exports = require(__dirname + '/build/Release/nodeyolo').Yolo;
 
-class Yolo
-{
- constructor(working_dir, dataset, configuration_file, weights)
- {
-  this.yolo = new YoloModule(working_dir, dataset, configuration_file, weights);
- }
+let yolo_addon = require(__dirname + '/build/Debug/nodeyolo').Yolo;
 
- detect(image_path)
- {
-  return new Promise((resolve, reject) =>
-  {
-   imagemagick.identify(image_path, true).then(() =>
-   {
-    this.yolo.detect(image_path).then(detections =>
-    {
-     resolve(detections);
+let obj = new yolo_addon.Yolo("./darknet", "./cfg/coco.data", "./cfg/yolov3-spp.cfg", ".weights/yolov3-spp.weights");
+
+obj.detect("darknet/data/dog.jpg")
+    .then((detections) => {
+        console.log(JSON.stringify(detections));
     })
-    .catch(error =>
-    {
-     reject(error);
+    .catch((error) => {
+        console.error(error);
     });
-   })
-   .catch(() =>
-   {
-    reject("Image " + image_path + " is corrupted.");
-   });
-  });
- }
-}
-
-module.exports = Yolo;
