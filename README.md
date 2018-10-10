@@ -22,8 +22,8 @@ npm i @vapi/node-yolo --save
 ## How To Use
 
 ```javascript
-const yolo = require('@vapi/node-yolo');
-const detector = new yolo("darknet-configs", "cfg/coco.data", "cfg/yolov3.cfg", "yolov3.weights");
+const Yolo = require('@vapi/node-yolo');
+const detector = new Yolo("darknet-configs", "cfg/coco.data", "cfg/yolov3.cfg", "yolov3.weights");
 try{
 	detector.detectImage(path)
          .then(detections => {
@@ -50,7 +50,7 @@ You need to create two folder, cfg and data and put the files for each one. Like
     │   └── yolov3.weights      # YoloV3 weights file
     └── ...
 
-**Note**: Our sugestion for better performance is to use [coco.data](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.data), [coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.names), [yolov3-spp.cfg](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3-spp.cfg) and [yolov3-spp.weights](https://pjreddie.com/media/files/yolov3-spp.weights).
+**Note**: Our suggestion for better performance is to use [coco.data](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.data), [coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.names), [yolov3-spp.cfg](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3-spp.cfg) and [yolov3-spp.weights](https://pjreddie.com/media/files/yolov3-spp.weights).
 
 #### detections object
 | **Field**   | **Description**
