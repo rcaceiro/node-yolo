@@ -1,6 +1,7 @@
 #include "libyolo.h"
 #include "map_lib.h"
 #include <limits.h>
+#include <opencv2/imgcodecs/imgcodecs_c.h>
 
 void yolo_cleanup(yolo_object *yolo)
 {
@@ -203,7 +204,7 @@ yolo_status parse_detections(yolo_object *yolo, detection *dets, yolo_detection 
  return yolo_ok;
 }
 
-yolo_status yolo_detect(yolo_object *yolo, yolo_detection **detect, char *filename, float thresh)
+yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection **detect, char *filename, float thresh)
 {
  if(yolo == NULL)
  {
@@ -225,6 +226,15 @@ yolo_status yolo_detect(yolo_object *yolo, yolo_detection **detect, char *filena
   fprintf(stderr, "error yolo_detect: %s\n", strerror(errno));
   return yolo_image_file_is_not_readable;
  }
+
+ CvMat *mat=cvLoadImageM(filename,CV_LOAD_IMAGE_COLOR);
+ if(mat==NULL)
+ {
+  fprintf(stderr, "error yolo_detect: %s\n", strerror(errno));
+  return yolo_image_file_is_corrupted;
+ }
+ cvReleaseMat(&mat);
+
  image im=load_image_color(filename, 0, 0);
  image sized=resize_image(im, yolo->net->w, yolo->net->h);
  float *X=sized.data;
@@ -320,6 +330,15 @@ yolo_status_detailed yolo_status_decode(yolo_status status)
    break;
   case yolo_names_file_is_not_readable:
    status_detailed.error_message="names file isn't readable";
+   break;
+  case yolo_image_file_is_not_exists:
+   status_detailed.error_message="image file isn't exists";
+   break;
+  case yolo_image_file_is_not_readable:
+   status_detailed.error_message="image file isn't readable";
+   break;
+  case yolo_image_file_is_corrupted:
+   status_detailed.error_message="image file is corrupted";
    break;
   default:
    status_detailed.error_code=-1;
