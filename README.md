@@ -4,11 +4,15 @@ This Node.js C++ Addon came out from a computer engineering project, [VAPi](http
 It allow you to use a state-of-the-art, real-time object detection system called [Yolo](https://pjreddie.com/darknet/yolo/).
 
 ### Pre-requirements
-* C/C++ Compiler
-* Nvidia graphic card with [CUDA](https://developer.nvidia.com/cuda-downloads) support and required files installed (Only if you want to use GPU acceleration)
-* [Node.js](https://nodejs.org/en/) >= 9
+* C/C++ Compiler (tested with gcc & g++)
+* Nvidia graphic card (Only if you want to use GPU acceleration):
+	* [CUDA](https://developer.nvidia.com/cuda-zone)
+	* [CuDNN](https://developer.nvidia.com/cudnn)
+* [Node.js](https://nodejs.org/en/) (tested on node.js>= 8)
 * [node-gyp](https://www.npmjs.com/package/node-gyp)
-* [ImageMagick](https://www.imagemagick.org/)
+* [OpenCV](https://opencv.org)
+
+**Note**: The previous version of the module has the [ImageMagick](https://www.imagemagick.org) as a dependency, but with OpenCV we can archive the desired goal. And by this we remove one dependency of the project.
 
 ## Installation
 ```sh
@@ -21,7 +25,7 @@ npm i @vapi/node-yolo --save
 const yolo = require('@vapi/node-yolo');
 const detector = new yolo("darknet-configs", "cfg/coco.data", "cfg/yolov3.cfg", "yolov3.weights");
 try{
-	detector.detect(path)
+	detector.detectImage(path)
          .then(detections => {
             // here you receive the detections
          })
