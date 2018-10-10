@@ -197,7 +197,7 @@ void async_detect(napi_env env, void *data)
  if(holder->yolo->created)
  {
   holder->yolo->mutex_lock();
-  holder->yolo_stats=yolo_detect(holder->yolo->yolo, &holder->img_detection, holder->image_path, 0.50);
+  holder->yolo_stats=yolo_detect_image(holder->yolo->yolo, &holder->img_detection, holder->image_path, 0.50);
   holder->yolo->mutex_unlock();
  }
  else
