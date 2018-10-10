@@ -50,8 +50,7 @@ You need to create two folder, cfg and data and put the files for each one. Like
     │   └── yolov3.weights      # YoloV3 weights file
     └── ...
 
-
-
+**Note**: Our sugestion for better performance is to use [coco.data](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.data), [coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.names), [yolov3-spp.cfg](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3-spp.cfg) and [yolov3-spp.weights](https://pjreddie.com/media/files/yolov3-spp.weights).
 
 #### detections object
 | **Field**   | **Description**
