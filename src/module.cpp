@@ -237,7 +237,7 @@ void Yolo::Destructor(napi_env env, void *nativeObject, void * /*finalize_hint*/
 napi_value Yolo::Init(napi_env env, napi_value exports)
 {
  napi_status status;
- napi_property_descriptor properties[]={{"detect", nullptr, Yolo::Detect, nullptr, nullptr, nullptr, napi_default, nullptr}};
+ napi_property_descriptor properties[]={{"detectImage", nullptr, Yolo::Detect, nullptr, nullptr, nullptr, napi_default, nullptr}};
 
  napi_value cons;
  status=napi_define_class(env, "Yolo", NAPI_AUTO_LENGTH, Yolo::New, nullptr, 1, properties, &cons);
