@@ -262,6 +262,12 @@ yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection **detect, char *
  return yolo_ok;
 }
 
+yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection **detect, char *filename, float thresh)
+{
+
+ return yolo_ok;
+}
+
 void yolo_detection_free(yolo_detection **yolo)
 {
  yolo_detection *yolo_det=*yolo;
