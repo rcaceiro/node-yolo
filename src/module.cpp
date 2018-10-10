@@ -215,6 +215,7 @@ Yolo::Yolo(char *working_directory, char *datacfg, char *cfgfile, char *weightfi
  if(yolo_stats != yolo_ok)
  {
   this->created=false;
+  return;
  }
  pthread_mutex_init(&this->mutex, nullptr);
  this->created=true;
