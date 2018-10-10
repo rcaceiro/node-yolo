@@ -3,6 +3,27 @@
 #include <limits.h>
 #include <opencv2/imgcodecs/imgcodecs_c.h>
 
+yolo_status yolo_check_before_process_filename(yolo_object *yolo, char *filename)
+{
+ if(yolo == NULL)
+ {
+  return yolo_object_is_not_initialized;
+ }
+
+ if(access(filename, F_OK) == -1)
+ {
+  fprintf(stderr, "error yolo_detect: %s\n", strerror(errno));
+  return yolo_image_file_is_not_exists;
+ }
+
+ if(access(filename, R_OK) == -1)
+ {
+  fprintf(stderr, "error yolo_detect: %s\n", strerror(errno));
+  return yolo_image_file_is_not_readable;
+ }
+ return yolo_ok;
+}
+
 void yolo_cleanup(yolo_object *yolo)
 {
  if(yolo == NULL)
@@ -206,34 +227,23 @@ yolo_status parse_detections(yolo_object *yolo, detection *dets, yolo_detection 
 
 yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection **detect, char *filename, float thresh)
 {
- if(yolo == NULL)
+ yolo_status status=yolo_check_before_process_filename(yolo,filename);
+ if(status!=yolo_ok)
  {
-  return yolo_object_is_not_initialized;
+  return status;
  }
 
- layer l=yolo->net->layers[yolo->net->n-1];
- clock_t time;
- float nms=0.45;
-
- if(access(filename, F_OK) == -1)
- {
-  fprintf(stderr, "error yolo_detect: %s\n", strerror(errno));
-  return yolo_image_file_is_not_exists;
- }
-
- if(access(filename, R_OK) == -1)
- {
-  fprintf(stderr, "error yolo_detect: %s\n", strerror(errno));
-  return yolo_image_file_is_not_readable;
- }
-
- CvMat *mat=cvLoadImageM(filename,CV_LOAD_IMAGE_COLOR);
- if(mat==NULL)
+ CvMat *mat=cvLoadImageM(filename, CV_LOAD_IMAGE_COLOR);
+ if(mat == NULL)
  {
   fprintf(stderr, "error yolo_detect: %s\n", strerror(errno));
   return yolo_image_file_is_corrupted;
  }
  cvReleaseMat(&mat);
+
+ layer l=yolo->net->layers[yolo->net->n-1];
+ clock_t time;
+ float nms=0.45;
 
  image im=load_image_color(filename, 0, 0);
  image sized=resize_image(im, yolo->net->w, yolo->net->h);
@@ -249,7 +259,7 @@ yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection **detect, char *
   do_nms_sort(dets, l.side*l.side*l.n, l.classes, nms);
  }
 
- yolo_status status=parse_detections(yolo, dets, detect, nboxes, l.classes, thresh);
+ status=parse_detections(yolo, dets, detect, nboxes, l.classes, thresh);
  if(status != yolo_ok)
  {
   return status;
@@ -264,6 +274,11 @@ yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection **detect, char *
 
 yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection **detect, char *filename, float thresh)
 {
+ yolo_status status=yolo_check_before_process_filename(yolo,filename);
+ if(status!=yolo_ok)
+ {
+  return status;
+ }
 
  return yolo_ok;
 }
