@@ -5,7 +5,7 @@
  },
  "targets":[
   {
-   "target_name":"nodeyolojs",
+   "target_name":"nodeyolo",
    "sources":[
     "src/module.cpp"
    ],
@@ -24,7 +24,6 @@
     "-Wall",
     "-Wfatal-errors",
     "-fPIC",
-    "-Ofast"
    ],
    "xcode_settings":{
     "GCC_ENABLE_CPP_EXCEPTIONS":"YES",
@@ -37,6 +36,18 @@
     }
    },
    "conditions":[
+   [
+   	'with_opencv=="true"',
+   	{
+   	 "defines":[
+   	  "OPENCV"
+   	 ],
+   	 "libraries":[
+   	  "-lopencv_core",
+       "-lopencv_highgui"
+   	 ],
+   	}
+    ],
     [
 	'with_cuda=="true"',
 	{
@@ -45,7 +56,7 @@
 	 ],
 	 "libraries":[
 	  "-L/usr/local/cuda/lib64",
-	  "-L/usr/lib/x86_64-linux-gnu/"
+	  "-L/usr/lib/x86_64-linux-gnu/",
 	  "-lcuda",
 	  "-lcudart",
 	  "-lcublas",
