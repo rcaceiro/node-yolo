@@ -1,6 +1,6 @@
 {
  "name":"@vapi/node-yolo",
- "version":"1.2.4",
+ "version":"2.0.0",
  "description":"Node.js interface for Yolo/Darknet",
  "keywords":[
   "yolo",
@@ -13,13 +13,13 @@
   "detection",
   "classification"
  ],
- "homepage":"https://github.com/rcaceiro/NodeYoloJS",
+ "homepage":"https://github.com/rcaceiro/node-yolo",
  "bugs":{
-  "url":"https://github.com/rcaceiro/NodeYoloJS/issues"
+  "url":"https://github.com/rcaceiro/node-yolo/issues"
  },
  "repository":{
   "type":"git",
-  "url":"git+https://github.com/rcaceiro/NodeYoloJS.git"
+  "url":"git+https://github.com/rcaceiro/node-yolo.git"
  },
  "main":"index.js",
  "gypfile":true,
@@ -27,11 +27,17 @@
   "preinstall":"make clean_all && make -j 2 && make clean && node-gyp configure && node-gyp build"
  },
  "dependencies":{
-  "imagickal":"^3.1.0"
  },
  "engines":{
   "node":">=9"
  },
+ "os":[
+  "darwin",
+  "linux"
+ ],
+ "cpu":[
+  "x64"
+ ],
  "author":"Rúben Caceiro <r.caceiro@hotmail.com> & Ricardo Maltez <ricardomaltez@gmail.com>",
  "license":"MIT"
 }
