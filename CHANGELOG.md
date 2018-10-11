@@ -7,10 +7,13 @@
 ## [v2.0.0](https://github.com/rcaceiro/node-yolo/tree/v2.0.0) (2018)
 [Full Changelog](https://github.com/rcaceiro/node-yolo/compare/previous_to_v2.0.0...v2.0.0)
 
+**New Features**:
+- node-yolo classify videos, but for now only video files, not a camera stream.
+
 **Implemented enhancements:**
 - Creation of a changelog
 - Added a capability on Makefile to detect OpenMP, only on Linux, if macOs users has it installed has to change manually the parameter OPENMP in Makefile.
-- Added a new feature to node-yolo classify videos, but for now only video files, not a camera stream.
+- Added constraints on CPU and OS to install this module in package.json
 
 **Fixed bugs:**
 - Fix on Makefile to include more new object files, needed
