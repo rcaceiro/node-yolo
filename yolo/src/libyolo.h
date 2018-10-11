@@ -82,7 +82,7 @@ typedef enum
 yolo_status yolo_init(yolo_object **yolo_obj, char *workingDir, char *datacfg, char *cfgfile, char *weightfile);
 
 yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection **detect, char *filename, float thresh);
-yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection **detect, char *filename, float thresh)
+yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection **detect, char *filename, float thresh);
 
 void yolo_detection_free(yolo_detection **yolo);
 void yolo_cleanup(yolo_object *yolo);
