@@ -37,6 +37,7 @@ UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 	SHARE_LIB_OPT += -shared
      SLIB=$(addprefix $(LIB_RAW_NAME),.so)
+     OPENMP=$(shell ldconfig -p | grep gomp > /dev/null 2> /dev/null && echo 1 || echo 0)
 endif
 ifeq ($(UNAME_S),Darwin)
 	SHARE_LIB_OPT += -dynamiclib
