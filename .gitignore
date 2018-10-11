@@ -36,6 +36,7 @@ cmake-build-debug/
 
 # Clion
 .idea/
+.gitconfig
 
 #libyolo build folder
 obj/
