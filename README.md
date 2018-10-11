@@ -12,8 +12,8 @@ It allow you to use a state-of-the-art, real-time object detection system called
 * [node-gyp](https://www.npmjs.com/package/node-gyp)
 * [OpenCV](https://opencv.org)
 
-**Note**: The previous version of the module has the [ImageMagick](https://www.imagemagick.org) as a dependency, but with OpenCV we can archive the desired goal. And by this we remove one dependency of the project.
-
+**Note 1**: Before any update please see the [changelog](https://github.com/rcaceiro/node-yolo/blob/master/CHANGELOG.md).<br>
+**Note 2**: The versions prior 2.0.0 of the module has the [ImageMagick](https://www.imagemagick.org) as a dependency, but with OpenCV we can archive the desired goal. And by this we remove one dependency of the project.
 ## Installation
 ```sh
 npm i @vapi/node-yolo --save
