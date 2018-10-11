@@ -47,5 +47,6 @@ build/
 node_modules/
 package-lock.json
 vapi-node-yolo*.tgz
+
 #macOS
 .DS_Store
