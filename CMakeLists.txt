@@ -12,7 +12,7 @@ INCLUDE_DIRECTORIES(/usr/include/node)
 INCLUDE_DIRECTORIES(/usr/local/Cellar/opencv/3.4.3/include/opencv)
 INCLUDE_DIRECTORIES(/usr/local/Cellar/opencv/3.4.3/include)
 INCLUDE_DIRECTORIES(map_lib)
-
+ADD_COMPILE_DEFINITIONS(OPENCV)
 
 ADD_EXECUTABLE(NodeYoloJS
 			yolo/src/libyolo.h
