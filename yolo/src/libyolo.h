@@ -42,7 +42,7 @@ typedef enum
  yolo_cannot_alloc_node_yolo_object,
  yolo_cannot_alloc_map,
  yolo_cannot_alloc_yolo_detection,
- yolo_cannot_alloc_detect,
+ yolo_cannot_realloc_detect,
  yolo_cannot_change_to_working_dir,
  yolo_object_is_not_initialized,
  yolo_working_dir_is_not_exists,
@@ -58,6 +58,8 @@ typedef enum
  yolo_image_file_is_not_exists,
  yolo_image_file_is_not_readable,
  yolo_image_file_is_corrupted,
+
+ yolo_video_cannot_alloc_base_structure,
 
  yolo_napi_create_array_failed,
  yolo_napi_create_object_failed,
