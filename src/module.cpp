@@ -146,13 +146,23 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
  auto *holder=static_cast<data_holder *>(data);
  napi_value instance;
  yolo_status yolo_stats=yolo_ok;
- status=napi_create_array_with_length(env, (size_t)holder->img_detection->num_boxes, &instance);
+ bool img_detection_is_null=holder->img_detection==nullptr;
+
+ if(img_detection_is_null)
+ {
+  status=napi_create_array_with_length(env, 0, &instance);
+ }
+ else
+ {
+  status=napi_create_array_with_length(env, static_cast<size_t>(holder->img_detection->num_boxes), &instance);
+ }
+
  if(status != napi_ok)
  {
   yolo_stats=yolo_napi_create_array_failed;
  }
 
- if(yolo_stats == yolo_ok)
+ if(yolo_stats == yolo_ok && !img_detection_is_null)
  {
   yolo_stats=load_detections(env, holder->img_detection, instance);
  }
@@ -346,7 +356,7 @@ napi_value Yolo::Detect(napi_env env, napi_callback_info info)
 
  napi_value resource_name;
  napi_value resource;
- status=napi_create_string_utf8(env, "nodeyolojs.detect", 18, &resource_name);
+ status=napi_create_string_utf8(env, "nodeyolo.detect", 18, &resource_name);
  assert(status == napi_ok);
  status=napi_create_object(env, &resource);
  assert(status == napi_ok);

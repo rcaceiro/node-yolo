@@ -1,5 +1,5 @@
-#ifndef NODEYOLOJS_MODULE_H
-#define NODEYOLOJS_MODULE_H
+#ifndef NODE_YOLO_MODULE_H
+#define NODE_YOLO_MODULE_H
 
 #include <node_api.h>
 #include <libyolo.h>
