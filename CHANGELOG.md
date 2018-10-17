@@ -9,6 +9,7 @@
 
 **New Features**:
 - node-yolo classify videos, but for now only video files, not a camera stream.
+- added to results of classification the time that took to be classified.
 
 **Implemented enhancements:**
 - Creation of a changelog
