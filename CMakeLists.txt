@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
-PROJECT(NodeYoloJS)
+PROJECT(node-yolo)
 
 SET(CMAKE_CXX_STANDARD 17)
 
@@ -14,6 +14,6 @@ INCLUDE_DIRECTORIES(/usr/local/Cellar/opencv/3.4.3/include)
 INCLUDE_DIRECTORIES(map_lib)
 ADD_COMPILE_DEFINITIONS(OPENCV)
 
-ADD_EXECUTABLE(NodeYoloJS
+ADD_EXECUTABLE(node-yolo
 			yolo/src/libyolo.h
 			yolo/src/libyolo.c src/module.cpp src/module.cpp src/module.h)
