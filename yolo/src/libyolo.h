@@ -19,6 +19,7 @@ typedef struct
 {
  detect *detection;
  int num_boxes;
+ float time_spent_for_classification;
 }yolo_detection;
 
 typedef struct
