@@ -141,54 +141,95 @@ yolo_status load_detections(napi_env env, yolo_detection *img_detections, napi_v
  return yolo_ok;
 }
 
+yolo_status load_detection_object(napi_env env, yolo_detection *img_detections, napi_value object)
+{
+ napi_value js_detections_array;
+ napi_value js_time_spent_for_classification;
+ yolo_status yolo_stats;
+
+ if(napi_create_int64(env,img_detections->time_spent_for_classification,&js_time_spent_for_classification)!=napi_ok)
+ {
+  return yolo_napi_create_object_time_spent_for_classification_long_failed;
+ }
+
+ if(napi_set_named_property(env,object,"timeSpentForClassification",js_time_spent_for_classification)!=napi_ok)
+ {
+  return yolo_napi_create_object_time_spent_for_classification_named_property_failed;
+ }
+
+ if(napi_create_array_with_length(env, static_cast<size_t>(img_detections->num_boxes), &js_detections_array) != napi_ok)
+ {
+  return yolo_napi_create_array_failed;
+ }
+
+ yolo_stats=load_detections(env, img_detections, js_detections_array);
+
+ if(yolo_stats!=yolo_ok)
+ {
+  return yolo_stats;
+ }
+
+ if(napi_set_named_property(env,object,"detections",js_detections_array)!=napi_ok)
+ {
+  return yolo_napi_create_object_time_spent_for_classification_named_property_failed;
+ }
+
+ return yolo_ok;
+}
+
+void reject(napi_env env, yolo_status yolo_stats, data_holder *holder)
+{
+ napi_value error;
+ yolo_status_detailed status_detailed=yolo_status_decode(yolo_stats);
+ if(napi_create_object(env, &error) == napi_ok)
+ {
+  napi_value string_error;
+  if(napi_create_string_utf8(env, status_detailed.error_message, strlen(status_detailed.error_message), &string_error) == napi_ok)
+  {
+   napi_set_named_property(env, error, "errorMessage", string_error);
+  }
+  napi_value error_code;
+  if(napi_create_int32(env, status_detailed.error_code, &error_code) == napi_ok)
+  {
+   napi_set_named_property(env, error, "errorCode", error_code);
+  }
+ }
+ napi_reject_deferred(env, holder->deferred, error);
+}
+
 void complete_async_detect(napi_env env, napi_status status, void *data)
 {
  auto *holder=static_cast<data_holder *>(data);
- napi_value instance;
- yolo_status yolo_stats=yolo_ok;
- bool img_detection_is_null=holder->img_detection==nullptr;
+ napi_value js_image_detection;
+ yolo_status yolo_stats;
 
- if(img_detection_is_null)
+ if(status!=napi_ok)
  {
-  status=napi_create_array_with_length(env, 0, &instance);
- }
- else
- {
-  status=napi_create_array_with_length(env, static_cast<size_t>(holder->img_detection->num_boxes), &instance);
+  reject(env,yolo_unknow_error,holder);
+  return;
  }
 
- if(status != napi_ok)
+ if(holder->img_detection==nullptr)
  {
-  yolo_stats=yolo_napi_create_array_failed;
+  reject(env,yolo_unknow_error,holder);
+  return;
  }
 
- if(yolo_stats == yolo_ok && !img_detection_is_null)
+ if(napi_create_object(env,&js_image_detection)!=napi_ok)
  {
-  yolo_stats=load_detections(env, holder->img_detection, instance);
+  reject(env,yolo_napi_create_main_object_failed,holder);
+  return;
  }
+
+ yolo_stats=load_detection_object(env,holder->img_detection,js_image_detection);
 
  if(yolo_stats == yolo_ok)
  {
-  napi_resolve_deferred(env, holder->deferred, instance);
+  napi_resolve_deferred(env, holder->deferred, js_image_detection);
  }
  else
  {
-  napi_value error;
-  yolo_status_detailed status_detailed=yolo_status_decode(yolo_stats);
-  if(napi_create_object(env, &error) == napi_ok)
-  {
-   napi_value string_error;
-   if(napi_create_string_utf8(env, status_detailed.error_message, strlen(status_detailed.error_message), &string_error) == napi_ok)
-   {
-    napi_set_named_property(env, error, "errorMessage", string_error);
-   }
-   napi_value error_code;
-   if(napi_create_int32(env, status_detailed.error_code, &error_code) == napi_ok)
-   {
-    napi_set_named_property(env, error, "errorCode", error_code);
-   }
-  }
-  napi_reject_deferred(env, holder->deferred, error);
+  reject(env,yolo_stats,holder);
  }
 
  yolo_detection_free(&holder->img_detection);
