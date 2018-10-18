@@ -19,7 +19,7 @@ typedef struct
 {
  detect *detection;
  int num_boxes;
- long time_spent_for_classification;
+ float time_spent_for_classification;
 }yolo_detection;
 
 typedef struct
@@ -82,7 +82,7 @@ typedef enum
  yolo_napi_create_box_w_named_property_failed,
  yolo_napi_create_box_h_double_failed,
  yolo_napi_create_box_h_named_property_failed,
- yolo_napi_create_object_time_spent_for_classification_long_failed,
+ yolo_napi_create_object_time_spent_for_classification_double_failed,
  yolo_napi_create_object_time_spent_for_classification_named_property_failed,
 
  yolo_unknow_error

@@ -147,9 +147,9 @@ yolo_status load_detection_object(napi_env env, yolo_detection *img_detections, 
  napi_value js_time_spent_for_classification;
  yolo_status yolo_stats;
 
- if(napi_create_int64(env,img_detections->time_spent_for_classification,&js_time_spent_for_classification)!=napi_ok)
+ if(napi_create_double(env,img_detections->time_spent_for_classification,&js_time_spent_for_classification)!=napi_ok)
  {
-  return yolo_napi_create_object_time_spent_for_classification_long_failed;
+  return yolo_napi_create_object_time_spent_for_classification_double_failed;
  }
 
  if(napi_set_named_property(env,object,"timeSpentForClassification",js_time_spent_for_classification)!=napi_ok)
