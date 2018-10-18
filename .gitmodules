@@ -1,3 +1,6 @@
 [submodule "darknet"]
 	path = darknet
 	url = https://github.com/pjreddie/darknet.git
+[submodule "stack"]
+	path = stack
+	url = https://github.com/rcaceiro/stack
