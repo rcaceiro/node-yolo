@@ -11,7 +11,7 @@ INCLUDE_DIRECTORIES(/usr/local/include/node)
 INCLUDE_DIRECTORIES(/usr/include/node)
 INCLUDE_DIRECTORIES(/usr/local/Cellar/opencv/3.4.3/include/opencv)
 INCLUDE_DIRECTORIES(/usr/local/Cellar/opencv/3.4.3/include)
-INCLUDE_DIRECTORIES(map_lib)
+INCLUDE_DIRECTORIES(stack)
 ADD_COMPILE_DEFINITIONS(OPENCV)
 
 ADD_EXECUTABLE(node-yolo
