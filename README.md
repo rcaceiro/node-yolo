@@ -3,6 +3,12 @@
 This Node.js C++ Addon came out from a computer engineering project, [VAPi](https://github.com/freakstatic/vapi-server).
 It allow you to use a state-of-the-art, real-time object detection system called [Yolo](https://pjreddie.com/darknet/yolo/).
 
+**Note**: Now is in progress some work to improve the module, to enhance the current functionalities:
+- First we begin to improve more robustness to the lib
+- Second give the possibility to process videos files and later on video streams
+- Split the libyolo and node-yolo projects, for those that like an easy lib to continue on C or C++ instead node.js.
+**Who fork and/or use this repo please stay sharp because alot of changes happening and not backwards compatibility between 1.*.* version and 2.*.* version.**
+
 ### Pre-requirements
 * C/C++ Compiler
 * Nvidia graphic card with [CUDA](https://developer.nvidia.com/cuda-downloads) support and required files installed (Only if you want to use GPU acceleration)
