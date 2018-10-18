@@ -1,25 +1,28 @@
 #include "libyolo.h"
-#include "map_lib.h"
+#include "stack.h"
 #include <limits.h>
 #include <semaphore.h>
 #include <pthread.h>
 #include <opencv2/imgcodecs/imgcodecs_c.h>
 #include <opencv2/videoio/videoio_c.h>
 
+//FIXME
+//typedef image value_t;
 typedef struct
 {
  sem_t *full;
  sem_t *empty;
- pthread_mutex_t mutex;
+ pthread_mutex_t mutex_stack;
+ pthread_mutex_t mutex_end;
  bool end;
- image images_buffer[10];
+ stack_node_t *stack;
  yolo_object *yolo;
  float thresh;
  yolo_detection **yolo_detect;
  CvCapture *video;
 }thread_data_t;
 
-void fill_detection(yolo_object *yolo,detection *network_detection, int network_detection_index, detect *yolo_detect)
+void fill_detection(yolo_object *yolo, detection *network_detection, int network_detection_index, detect *yolo_detect)
 {
  size_t strlength=strlen(yolo->names[network_detection_index]);
  yolo->names[network_detection_index][strlength]='\0';
@@ -40,7 +43,7 @@ void fill_detection(yolo_object *yolo,detection *network_detection, int network_
  }
 }
 
-yolo_status parse_detections(yolo_object *yolo, detection *dets, yolo_detection **yolo_detect, float time_spent_for_classification,int nboxes,  float thresh)
+yolo_status parse_detections(yolo_object *yolo, detection *dets, yolo_detection **yolo_detect, float time_spent_for_classification, int nboxes, float thresh)
 {
  if((*yolo_detect) == NULL)
  {
@@ -78,7 +81,7 @@ yolo_status parse_detections(yolo_object *yolo, detection *dets, yolo_detection 
     return yolo_cannot_realloc_detect;
    }
    (*yolo_detect)->detection=temp_pointer;
-   fill_detection(yolo,det,class_index,(*yolo_detect)->detection+(*yolo_detect)->num_boxes);
+   fill_detection(yolo, det, class_index, (*yolo_detect)->detection+(*yolo_detect)->num_boxes);
    (*yolo_detect)->num_boxes++;
   }
  }
@@ -116,36 +119,97 @@ void *thread_detect(void *data)
   return NULL;
  }
  thread_data_t *th_data=data;
- layer l=th_data->yolo->net->layers[th_data->yolo->net->n-1];
- clock_t time;
- float nms=0.45;
- //FIXME Hard code array access
- image im=th_data->images_buffer[0];
- image sized=resize_image(im, th_data->yolo->net->w, th_data->yolo->net->h);
- float *X=sized.data;
- time=clock();
- network_predict(th_data->yolo->net, X);
-
- int nboxes=0;
- detection *dets=get_network_boxes(th_data->yolo->net, im.w, im.h, th_data->thresh, 0.5, 0, 0, &nboxes);
- if(nms)
+ while(true)
  {
-  do_nms_sort(dets, l.side*l.side*l.n, l.classes, nms);
- }
+  if(sem_trywait(th_data->full)<0)
+  {
+   bool end;
+   if(pthread_mutex_lock(&th_data->mutex_end)!=0)
+   {
+    continue;
+   }
+   end=th_data->end;
+   pthread_mutex_unlock(&th_data->mutex_end);
+   if(end)
+   {
+    break;
+   }
+   continue;
+  }
+  if(pthread_mutex_lock(&th_data->mutex_stack)!=0)
+  {
+   continue;
+  }
 
- yolo_status status=parse_detections(th_data->yolo, dets, th_data->yolo_detect, nboxes, l.classes, th_data->thresh);
- if(status != yolo_ok)
- {
-  return NULL;
- }
+  stack_node_t *node;
+  stack_pop(th_data->stack,&node);
+  pthread_mutex_unlock(&th_data->mutex_stack);
+  sem_post(th_data->empty);
+  //image im=node->value;
+  image im=make_image(0,0,0);
+  stack_free_node(node);
 
- free_detections(dets, nboxes);
- free_image(im);
- free_image(sized);
+  layer l=th_data->yolo->net->layers[th_data->yolo->net->n-1];
+  clock_t time;
+  float nms=0.45;
+
+  image sized=resize_image(im, th_data->yolo->net->w, th_data->yolo->net->h);
+  float *X=sized.data;
+  time=clock();
+  network_predict(th_data->yolo->net, X);
+
+  int nboxes=0;
+  detection *dets=get_network_boxes(th_data->yolo->net, im.w, im.h, th_data->thresh, 0.5, 0, 0, &nboxes);
+  if(nms)
+  {
+   do_nms_sort(dets, l.side*l.side*l.n, l.classes, nms);
+  }
+
+  yolo_status status=parse_detections(th_data->yolo, dets, th_data->yolo_detect, sec(clock()-time), nboxes, th_data->thresh);
+  if(status != yolo_ok)
+  {
+   return NULL;
+  }
+
+  free_detections(dets, nboxes);
+  free_image(im);
+  free_image(sized);
+ }
+ return NULL;
 }
 
 void *thread_capture(void *data)
 {
+ if(data == NULL)
+ {
+  return NULL;
+ }
+ thread_data_t *thread_data=data;
+ IplImage *ipl_image=NULL;
+
+ while(true)
+ {
+  ipl_image=cvQueryFrame(thread_data->video);
+  if(ipl_image == NULL)
+  {
+   if(pthread_mutex_lock(&thread_data->mutex_end)!=0)
+   {
+    continue;
+   }
+   thread_data->end=true;
+   pthread_mutex_unlock(&thread_data->mutex_end);
+   break;
+  }
+  image yolo_image=libyolo_ipl_to_image(ipl_image);
+  sem_wait(thread_data->empty);
+  if(pthread_mutex_lock(&thread_data->mutex_stack)!=0)
+  {
+   continue;
+  }
+  //stack_push(thread_data->stack,yolo_image);
+  pthread_mutex_unlock(&thread_data->mutex_stack);
+  sem_post(thread_data->full);
+ }
  return NULL;
 }
 
@@ -177,15 +241,15 @@ void yolo_cleanup(yolo_object *yolo)
   return;
  }
  free_network(yolo->net);
- for(int i=0; i<yolo->class_number; i++)
- {
-  if(yolo->names[i] != NULL)
-  {
-   free(yolo->names[i]);
-  }
- }
  if(yolo->names != NULL)
  {
+  for(int i=0; i<yolo->class_number; i++)
+  {
+   if(yolo->names[i] != NULL)
+   {
+    free(yolo->names[i]);
+   }
+  }
   free(yolo->names);
  }
  free(yolo);
@@ -291,7 +355,7 @@ yolo_status yolo_init(yolo_object **yolo_obj, char *workingDir, char *datacfg, c
 }
 
 yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection **detect, char *filename, float thresh)
- {
+{
  yolo_status status=yolo_check_before_process_filename(yolo, filename);
  if(status != yolo_ok)
  {
@@ -323,7 +387,7 @@ yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection **detect, char *
   do_nms_sort(dets, l.side*l.side*l.n, l.classes, nms);
  }
 
- status=parse_detections(yolo, dets, detect,sec(clock()-time), nboxes, thresh);
+ status=parse_detections(yolo, dets, detect, sec(clock()-time), nboxes, thresh);
  if(status != yolo_ok)
  {
   return status;
@@ -356,7 +420,11 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection **detect, char *
  thread_data->yolo=yolo;
  thread_data->end=false;
  thread_data->thresh=thresh;
- if(!pthread_mutex_init(&thread_data->mutex, NULL))
+ if(!pthread_mutex_init(&thread_data->mutex_stack, NULL))
+ {
+  return yolo_video_cannot_alloc_base_structure;
+ }
+ if(!pthread_mutex_init(&thread_data->mutex_end, NULL))
  {
   return yolo_video_cannot_alloc_base_structure;
  }
@@ -383,13 +451,13 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection **detect, char *
  }
 
  pthread_join(producer, NULL);
-
  cvReleaseCapture(&thread_data->video);
 
  pthread_join(consumer, NULL);
  sem_close(thread_data->full);
  sem_close(thread_data->empty);
- pthread_mutex_destroy(&thread_data->mutex);
+ pthread_mutex_destroy(&thread_data->mutex_stack);
+ pthread_mutex_destroy(&thread_data->mutex_end);
  free(thread_data);
 
  return yolo_ok;
@@ -398,7 +466,7 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection **detect, char *
 void yolo_detection_free(yolo_detection **yolo)
 {
  yolo_detection *yolo_det=*yolo;
- if(yolo_det==NULL)
+ if(yolo_det == NULL)
  {
   return;
  }
@@ -477,6 +545,18 @@ yolo_status_detailed yolo_status_decode(yolo_status status)
   case yolo_image_file_is_corrupted:
    status_detailed.error_message="image file is corrupted";
    break;
+   //  case yolo_napi_create_object_time_spent_for_classification_double_failed:
+   //   status_detailed.error_message="image file is corrupted";
+   //   break;
+   //  case yolo_napi_create_object_time_spent_for_classification_named_property_failed:
+   //   status_detailed.error_message="image file is corrupted";
+   //   break;
+   //  case yolo_napi_set_array_property_failed:
+   //   status_detailed.error_message="image file is corrupted";
+   //   break;
+   //  case yolo_napi_create_main_object_failed:
+   //   status_detailed.error_message="image file is corrupted";
+   //   break;
   default:
    status_detailed.error_code=-1;
    status_detailed.error_message="Unknow error";
