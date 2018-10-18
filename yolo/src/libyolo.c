@@ -78,7 +78,7 @@ yolo_status parse_detections(yolo_object *yolo, detection *dets, yolo_detection 
     return yolo_cannot_realloc_detect;
    }
    (*yolo_detect)->detection=temp_pointer;
-   fill_detection(yolo,det,(*yolo_detect)->detection+(*yolo_detect)->num_boxes);
+   fill_detection(yolo,det,class_index,(*yolo_detect)->detection+(*yolo_detect)->num_boxes);
    (*yolo_detect)->num_boxes++;
   }
  }
