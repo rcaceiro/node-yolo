@@ -19,7 +19,7 @@ typedef struct
 {
  detect *detection;
  int num_boxes;
- float time_spent_for_classification;
+ long time_spent_for_classification;
 }yolo_detection;
 
 typedef struct
@@ -62,7 +62,9 @@ typedef enum
 
  yolo_video_cannot_alloc_base_structure,
 
+ yolo_napi_create_main_object_failed,
  yolo_napi_create_array_failed,
+ yolo_napi_set_array_property_failed,
  yolo_napi_create_object_failed,
  yolo_napi_set_object_to_array_failed,
  yolo_napi_create_class_name_string_failed,
@@ -80,6 +82,10 @@ typedef enum
  yolo_napi_create_box_w_named_property_failed,
  yolo_napi_create_box_h_double_failed,
  yolo_napi_create_box_h_named_property_failed,
+ yolo_napi_create_object_time_spent_for_classification_long_failed,
+ yolo_napi_create_object_time_spent_for_classification_named_property_failed,
+
+ yolo_unknow_error
 }yolo_status;
 
 yolo_status yolo_init(yolo_object **yolo_obj, char *workingDir, char *datacfg, char *cfgfile, char *weightfile);
