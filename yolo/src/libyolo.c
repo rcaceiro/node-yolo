@@ -6,8 +6,6 @@
 #include <opencv2/imgcodecs/imgcodecs_c.h>
 #include <opencv2/videoio/videoio_c.h>
 
-//FIXME
-//typedef image value_t;
 typedef struct
 {
  sem_t *full;
@@ -134,20 +132,25 @@ void *thread_detect(void *data)
    {
     break;
    }
+   printf("there is nothing to process");
    continue;
   }
+
+  image im;
+  bool im_got_sucessfull;
   if(pthread_mutex_lock(&th_data->mutex_stack)!=0)
   {
    continue;
   }
 
-  stack_node_t *node;
-  stack_pop(th_data->stack,&node);
+  im_got_sucessfull=stack_pop(&th_data->stack,&im);
+
   pthread_mutex_unlock(&th_data->mutex_stack);
   sem_post(th_data->empty);
-  //image im=node->value;
-  image im=make_image(0,0,0);
-  stack_free_node(node);
+  if(!im_got_sucessfull)
+  {
+   continue;
+  }
 
   layer l=th_data->yolo->net->layers[th_data->yolo->net->n-1];
   clock_t time;
@@ -206,7 +209,7 @@ void *thread_capture(void *data)
   {
    continue;
   }
-  //stack_push(thread_data->stack,yolo_image);
+  stack_push(&thread_data->stack,yolo_image);
   pthread_mutex_unlock(&thread_data->mutex_stack);
   sem_post(thread_data->full);
  }
