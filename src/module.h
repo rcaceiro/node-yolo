@@ -21,7 +21,8 @@ private:
 
  static napi_value New(napi_env env, napi_callback_info info);
 
- static napi_value Detect(napi_env env, napi_callback_info info);
+ static napi_value DetectImage(napi_env env, napi_callback_info info);
+ static napi_value DetectVideo(napi_env env, napi_callback_info info);
 
  static napi_ref constructor;
 

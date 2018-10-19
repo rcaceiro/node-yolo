@@ -241,7 +241,7 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
  napi_delete_async_work(env, work);
 }
 
-void async_detect(napi_env env, void *data)
+void async_detect_image(napi_env env, void *data)
 {
  (void)env;
  auto *holder=static_cast<data_holder *>(data);
@@ -249,6 +249,22 @@ void async_detect(napi_env env, void *data)
  {
   holder->yolo->mutex_lock();
   holder->yolo_stats=yolo_detect_image(holder->yolo->yolo, &holder->img_detection, holder->image_path, 0.50);
+  holder->yolo->mutex_unlock();
+ }
+ else
+ {
+  holder->yolo_stats=yolo_instanciation;
+ }
+}
+
+void async_detect_video(napi_env env, void *data)
+{
+ (void)env;
+ auto *holder=static_cast<data_holder *>(data);
+ if(holder->yolo->created)
+ {
+  holder->yolo->mutex_lock();
+  holder->yolo_stats=yolo_detect_video(holder->yolo->yolo, &holder->img_detection, holder->image_path, 0.50);
   holder->yolo->mutex_unlock();
  }
  else
@@ -288,7 +304,7 @@ void Yolo::Destructor(napi_env env, void *nativeObject, void * /*finalize_hint*/
 napi_value Yolo::Init(napi_env env, napi_value exports)
 {
  napi_status status;
- napi_property_descriptor properties[]={{"detectImage", nullptr, Yolo::Detect, nullptr, nullptr, nullptr, napi_default, nullptr}};
+ napi_property_descriptor properties[]={{"detectImage", nullptr, Yolo::DetectImage, nullptr, nullptr, nullptr, napi_default, nullptr},{"detectVideo", nullptr, Yolo::DetectVideo, nullptr, nullptr, nullptr, napi_default, nullptr}};
 
  napi_value cons;
  status=napi_define_class(env, "Yolo", NAPI_AUTO_LENGTH, Yolo::New, nullptr, 1, properties, &cons);
@@ -359,7 +375,7 @@ napi_value Yolo::New(napi_env env, napi_callback_info info)
  }
 }
 
-napi_value Yolo::Detect(napi_env env, napi_callback_info info)
+napi_value Yolo::DetectImage(napi_env env, napi_callback_info info)
 {
  napi_status status;
  napi_deferred deferred;
@@ -397,7 +413,7 @@ napi_value Yolo::Detect(napi_env env, napi_callback_info info)
 
  napi_value resource_name;
  napi_value resource;
- status=napi_create_string_utf8(env, "nodeyolo.detect", 18, &resource_name);
+ status=napi_create_string_utf8(env, "nodeyolo.detect_image", 18, &resource_name);
  assert(status == napi_ok);
  status=napi_create_object(env, &resource);
  assert(status == napi_ok);
@@ -417,7 +433,73 @@ napi_value Yolo::Detect(napi_env env, napi_callback_info info)
  holder->yolo=yolo_obj;
  holder->resource=resource;
 
- status=napi_create_async_work(env, resource, resource_name, async_detect, complete_async_detect, holder, &holder->work);
+ status=napi_create_async_work(env, resource, resource_name, async_detect_image, complete_async_detect, holder, &holder->work);
+ assert(status == napi_ok);
+ status=napi_queue_async_work(env, holder->work);
+ assert(status == napi_ok);
+
+ return promise;
+}
+
+napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
+{
+ napi_status status;
+ napi_deferred deferred;
+ napi_value promise;
+ napi_value jsthis;
+ size_t argc=1;
+ napi_value args[1];
+
+ status=napi_get_cb_info(env, info, &argc, args, &jsthis, nullptr);
+ if(status != napi_ok)
+ {
+  napi_throw_error(env, "00", "Cannot get arguments");
+  return nullptr;
+ }
+
+ if(argc<1)
+ {
+  napi_throw_error(env, "01", "You have to pass the path to image as parameter");
+  return nullptr;
+ }
+
+ char *video_path=nullptr;
+ status=get_string_value(env, args, 0, &video_path, 0);
+ assert(status == napi_ok);
+ if(video_path == nullptr)
+ {
+  napi_throw_error(env, "02", "Cannot get video path");
+  return nullptr;
+ }
+
+ void *obj=nullptr;
+ status=napi_unwrap(env, jsthis, &obj);
+ assert(status == napi_ok);
+ auto *yolo_obj=static_cast<Yolo *>(obj);
+
+ napi_value resource_name;
+ napi_value resource;
+ status=napi_create_string_utf8(env, "nodeyolo.detect_video", 18, &resource_name);
+ assert(status == napi_ok);
+ status=napi_create_object(env, &resource);
+ assert(status == napi_ok);
+
+ auto *holder=static_cast<data_holder *>(calloc(1, sizeof(data_holder)));
+ if(holder == nullptr)
+ {
+  napi_throw_error(env, "03", "Cannot allocate a struct in memory");
+  return nullptr;
+ }
+
+ status=napi_create_promise(env, &deferred, &promise);
+ assert(status == napi_ok);
+
+ holder->deferred=deferred;
+ holder->image_path=video_path;
+ holder->yolo=yolo_obj;
+ holder->resource=resource;
+
+ status=napi_create_async_work(env, resource, resource_name, async_detect_video, complete_async_detect, holder, &holder->work);
  assert(status == napi_ok);
  status=napi_queue_async_work(env, holder->work);
  assert(status == napi_ok);
