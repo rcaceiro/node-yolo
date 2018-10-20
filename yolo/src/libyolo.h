@@ -27,6 +27,12 @@ typedef struct
  yolo_detection_image detection_frame;
  float second;
  long frame;
+}yolo_detection_frame;
+
+typedef struct
+{
+ yolo_detection_frame *frame_detections;
+ int count;
 }yolo_detection_video;
 
 typedef struct
@@ -97,10 +103,11 @@ typedef enum
 
 yolo_status yolo_init(yolo_object **yolo_obj, char *workingDir, char *datacfg, char *cfgfile, char *weightfile);
 
-yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection **detect, char *filename, float thresh);
-yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection **detect, char *filename, float thresh);
+yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection_image **detect, char *filename, float thresh);
+yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, char *filename, float thresh);
 
-void yolo_detection_free(yolo_detection **yolo);
+void yolo_detection_free(yolo_detection_image **yolo);
+void yolo_detection_video_free(yolo_detection_video **yolo);
 void yolo_cleanup(yolo_object *yolo);
 
 yolo_status_detailed yolo_status_decode(yolo_status status);
