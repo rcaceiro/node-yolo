@@ -20,7 +20,14 @@ typedef struct
  detect *detection;
  int num_boxes;
  float time_spent_for_classification;
-}yolo_detection;
+}yolo_detection_image;
+
+typedef struct
+{
+ yolo_detection_image detection_frame;
+ float second;
+ long frame;
+}yolo_detection_video;
 
 typedef struct
 {
