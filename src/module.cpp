@@ -307,7 +307,7 @@ napi_value Yolo::Init(napi_env env, napi_value exports)
  napi_property_descriptor properties[]={{"detectImage", nullptr, Yolo::DetectImage, nullptr, nullptr, nullptr, napi_default, nullptr},{"detectVideo", nullptr, Yolo::DetectVideo, nullptr, nullptr, nullptr, napi_default, nullptr}};
 
  napi_value cons;
- status=napi_define_class(env, "Yolo", NAPI_AUTO_LENGTH, Yolo::New, nullptr, 1, properties, &cons);
+ status=napi_define_class(env, "Yolo\0", NAPI_AUTO_LENGTH, Yolo::New, nullptr, 2, properties, &cons);
  assert(status == napi_ok);
 
  status=napi_create_reference(env, cons, 1, &Yolo::constructor);
