@@ -25,7 +25,7 @@ typedef struct
 typedef struct
 {
  yolo_detection_image detection_frame;
- float second;
+ double second;
  long frame;
 }yolo_detection_frame;
 
