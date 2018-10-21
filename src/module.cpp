@@ -82,12 +82,12 @@ yolo_status load_box_object(napi_env env, box img_box, napi_value jsbox)
  return yolo_ok;
 }
 
-yolo_status load_detections(napi_env env, yolo_detection *img_detections, napi_value jsarray)
+yolo_status load_detections(napi_env env, yolo_detection_image *img_detections, napi_value jsarray)
 {
  napi_status status;
  napi_value jsobj, box_object, classes, prob;
  detect det;
- for(int i=0; i<img_detections->num_boxes; ++i)
+ for(size_t i=0; i<img_detections->num_boxes; ++i)
  {
   det=img_detections->detection[i];
   status=napi_create_object(env, &jsobj);
@@ -141,7 +141,7 @@ yolo_status load_detections(napi_env env, yolo_detection *img_detections, napi_v
  return yolo_ok;
 }
 
-yolo_status load_detection_object(napi_env env, yolo_detection *img_detections, napi_value object)
+yolo_status load_detection_object(napi_env env, yolo_detection_image *img_detections, napi_value object)
 {
  napi_value js_detections_array;
  napi_value js_time_spent_for_classification;
@@ -177,6 +177,56 @@ yolo_status load_detection_object(napi_env env, yolo_detection *img_detections, 
  return yolo_ok;
 }
 
+yolo_status load_video_detection_object(napi_env env, yolo_detection_video *video_detections, napi_value frames_array)
+{
+ yolo_status yolo_stats;
+
+ for(size_t i=0; i<video_detections->count; ++i)
+ {
+  napi_value object;
+  napi_value frame_id;
+  napi_value second;
+
+  if(napi_create_object(env,&object)!=napi_ok)
+  {
+   return yolo_napi_create_main_object_failed;
+  }
+
+  if(napi_create_int64(env,video_detections->frame_detections[i].frame,&frame_id)!=napi_ok)
+  {
+   return yolo_napi_create_frame_failed;
+  }
+
+  if(napi_create_double(env,video_detections->frame_detections[i].second,&second)!=napi_ok)
+  {
+   return yolo_napi_create_second_failed;
+  }
+
+  if(napi_set_named_property(env,object,"frame_number",frame_id)!=napi_ok)
+  {
+   return yolo_napi_set_frame_to_object_failed;
+  }
+
+  if(napi_set_named_property(env,object,"second",second)!=napi_ok)
+  {
+   return yolo_napi_set_second_to_object_failed;
+  }
+
+  yolo_stats=load_detection_object(env,&video_detections->frame_detections[i].detection_frame,object);
+  if(yolo_stats!=yolo_ok)
+  {
+   return yolo_napi_create_main_object_failed;
+  }
+
+  if(napi_set_element(env, frames_array, static_cast<uint32_t>(i), object) != napi_ok)
+  {
+   return yolo_napi_set_array_property_failed;
+  }
+ }
+
+ return yolo_ok;
+}
+
 void reject(napi_env env, yolo_status yolo_stats, data_holder *holder)
 {
  napi_value error;
@@ -200,7 +250,7 @@ void reject(napi_env env, yolo_status yolo_stats, data_holder *holder)
 void complete_async_detect(napi_env env, napi_status status, void *data)
 {
  auto *holder=static_cast<data_holder *>(data);
- napi_value js_image_detection;
+ napi_value return_value;
  yolo_status yolo_stats;
 
  if(status!=napi_ok)
@@ -209,30 +259,55 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
   return;
  }
 
- if(holder->img_detection==nullptr)
+ if(holder->img_detection==nullptr&&holder->video_detection==nullptr)
  {
   reject(env,yolo_unknow_error,holder);
   return;
  }
 
- if(napi_create_object(env,&js_image_detection)!=napi_ok)
+ if(holder->img_detection != nullptr)
  {
-  reject(env,yolo_napi_create_main_object_failed,holder);
-  return;
- }
+  if(napi_create_object(env,&return_value)!=napi_ok)
+  {
+   reject(env,yolo_napi_create_main_object_failed,holder);
+  }
+  else
+  {
+   yolo_stats=load_detection_object(env,holder->img_detection,return_value);
 
- yolo_stats=load_detection_object(env,holder->img_detection,js_image_detection);
-
- if(yolo_stats == yolo_ok)
- {
-  napi_resolve_deferred(env, holder->deferred, js_image_detection);
+   if(yolo_stats == yolo_ok)
+   {
+    napi_resolve_deferred(env, holder->deferred, return_value);
+   }
+   else
+   {
+    reject(env,yolo_stats,holder);
+   }
+  }
+  yolo_detection_image_free(&holder->img_detection);
  }
  else
  {
-  reject(env,yolo_stats,holder);
+  if(napi_create_array_with_length(env,holder->video_detection->count,&return_value)!=napi_ok)
+  {
+   reject(env,yolo_napi_create_main_object_failed,holder);
+  }
+  else
+  {
+   yolo_stats=load_video_detection_object(env,holder->video_detection,return_value);
+
+   if(yolo_stats == yolo_ok)
+   {
+    napi_resolve_deferred(env, holder->deferred, return_value);
+   }
+   else
+   {
+    reject(env,yolo_stats,holder);
+   }
+  }
+  yolo_detection_video_free(&holder->video_detection);
  }
 
- yolo_detection_free(&holder->img_detection);
  napi_async_work work=holder->work;
 
  free(holder->image_path);
@@ -264,7 +339,7 @@ void async_detect_video(napi_env env, void *data)
  if(holder->yolo->created)
  {
   holder->yolo->mutex_lock();
-  holder->yolo_stats=yolo_detect_video(holder->yolo->yolo, &holder->img_detection, holder->image_path, 0.50);
+  holder->yolo_stats=yolo_detect_video(holder->yolo->yolo, &holder->video_detection, holder->image_path, 0.50);
   holder->yolo->mutex_unlock();
  }
  else

@@ -38,7 +38,8 @@ typedef struct
  napi_deferred deferred;
  napi_async_work work;
  napi_value resource;
- yolo_detection *img_detection;
+ yolo_detection_image *img_detection;
+ yolo_detection_video *video_detection;
  yolo_status yolo_stats;
 }data_holder;
 

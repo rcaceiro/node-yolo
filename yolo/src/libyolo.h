@@ -86,6 +86,10 @@ typedef enum
  yolo_napi_set_probability_property_failed,
  yolo_napi_create_box_object_failed,
  yolo_napi_set_box_property_failed,
+ yolo_napi_create_frame_failed,
+ yolo_napi_set_frame_to_object_failed,
+ yolo_napi_create_second_failed,
+ yolo_napi_set_second_to_object_failed,
 
  yolo_napi_create_box_x_double_failed,
  yolo_napi_create_box_x_named_property_failed,
