@@ -3,6 +3,7 @@
 #include <limits.h>
 #include <semaphore.h>
 #include <pthread.h>
+#include <fcntl.h>
 #include <opencv2/imgcodecs/imgcodecs_c.h>
 #include <opencv2/videoio/videoio_c.h>
 
