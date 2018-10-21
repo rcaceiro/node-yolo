@@ -509,7 +509,7 @@ void yolo_detection_image_free(yolo_detection_image **yolo)
  (*yolo)=NULL;
 }
 
-void yolo_detection_video_t_free(yolo_detection_video **yolo)
+void yolo_detection_video_free(yolo_detection_video **yolo)
 {
  yolo_detection_video *yolo_det=*yolo;
  if(yolo_det == NULL)

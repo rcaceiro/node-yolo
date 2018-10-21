@@ -18,7 +18,7 @@ typedef struct
 typedef struct
 {
  detect *detection;
- int num_boxes;
+ size_t num_boxes;
  float time_spent_for_classification;
 }yolo_detection_image;
 
@@ -32,7 +32,7 @@ typedef struct
 typedef struct
 {
  yolo_detection_frame *frame_detections;
- int count;
+ size_t count;
 }yolo_detection_video;
 
 typedef struct
@@ -106,7 +106,7 @@ yolo_status yolo_init(yolo_object **yolo_obj, char *workingDir, char *datacfg, c
 yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection_image **detect, char *filename, float thresh);
 yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, char *filename, float thresh);
 
-void yolo_detection_free(yolo_detection_image **yolo);
+void yolo_detection_image_free(yolo_detection_image **yolo);
 void yolo_detection_video_free(yolo_detection_video **yolo);
 void yolo_cleanup(yolo_object *yolo);
 
