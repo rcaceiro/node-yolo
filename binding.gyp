@@ -44,7 +44,9 @@
    	 ],
    	 "libraries":[
    	  "-lopencv_core",
-       "-lopencv_highgui"
+       "-lopencv_highgui",
+       "-lopencv_videoio",
+       "-lopencv_video"
    	 ],
    	}
     ],
