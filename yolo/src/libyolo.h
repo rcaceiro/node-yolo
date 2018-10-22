@@ -74,6 +74,7 @@ typedef enum
  yolo_image_file_is_corrupted,
 
  yolo_video_cannot_alloc_base_structure,
+ yolo_cannot_open_video_stream,
 
  yolo_napi_create_main_object_failed,
  yolo_napi_create_array_failed,

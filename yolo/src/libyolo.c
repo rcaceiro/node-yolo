@@ -467,6 +467,11 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  }
 
  thread_data->video=cvCaptureFromFile(filename);
+ if(thread_data->video==NULL)
+ {
+  return yolo_cannot_open_video_stream;
+ }
+
  thread_data->stream_fps=cvGetCaptureProperty(thread_data->video,CV_CAP_PROP_FPS);
  if(pthread_create(&producer, NULL, thread_capture, thread_data))
  {
