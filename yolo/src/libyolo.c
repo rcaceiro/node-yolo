@@ -610,7 +610,6 @@ yolo_status_detailed yolo_status_decode(yolo_status status)
    //   status_detailed.error_message="image file is corrupted";
    //   break;
   default:
-   status_detailed.error_code=-1;
    status_detailed.error_message="Unknow error";
  }
  return status_detailed;
