@@ -16,4 +16,4 @@ ADD_COMPILE_DEFINITIONS(OPENCV)
 
 ADD_EXECUTABLE(node-yolo
 			yolo/src/libyolo.h
-			yolo/src/libyolo.c src/module.cpp src/module.cpp src/module.h)
+			yolo/src/libyolo.c src/module.cpp src/module.cpp src/module.h yolo/src/opencv_handler.cpp yolo/src/opencv_handler.h)
