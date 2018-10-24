@@ -55,7 +55,7 @@ CPP=g++
 NVCC=nvcc 
 AR=ar
 ARFLAGS=rcs
-OPTS=-Ofast
+OPTS=
 LDFLAGS= -lm -pthread 
 COMMON= -I./darknet/include/ -I./darknet/src/ -I./stack/ -I./common/include/
 CFLAGS=-Wall -Wno-unused-result -Wno-unknown-pragmas -Wfatal-errors -fPIC
@@ -65,7 +65,9 @@ CFLAGS+= -fopenmp
 endif
 
 ifeq ($(DEBUG), 1) 
-OPTS=-O0 -g
+OPTS+=-O0 -g
+else
+OPTS+=-Ofast
 endif
 
 CFLAGS+=$(OPTS)
