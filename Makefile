@@ -57,7 +57,7 @@ AR=ar
 ARFLAGS=rcs
 OPTS=-Ofast
 LDFLAGS= -lm -pthread 
-COMMON= -I./darknet/include/ -I./darknet/src/ -I./stack/
+COMMON= -I./darknet/include/ -I./darknet/src/ -I./stack/ -I./common/include/
 CFLAGS=-Wall -Wno-unused-result -Wno-unknown-pragmas -Wfatal-errors -fPIC
 
 ifeq ($(OPENMP), 1) 

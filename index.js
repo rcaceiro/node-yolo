@@ -12,7 +12,7 @@ let obj = new yolo_addon("./darknet", "./cfg/coco.data", "./cfg/yolov3-spp.cfg",
 //         console.error(error);
 //     });
 
-obj.detectVideo("./data/crowd.mp4")
+obj.detectVideo("/home/rcaceiro/Documents/IPLeiria/research_grant/node-yolo/data/drop.avi")
     .then((detections) => {
         console.log(JSON.stringify(detections));
     })
