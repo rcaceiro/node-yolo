@@ -1,6 +1,6 @@
 {
  "variables":{
-  "with_opencv%":"true",
+  "with_openmp%":"<!(node ./util/has_lib.js openmp)",
   "with_cuda%":"<!(node ./util/has_lib.js cuda)"
  },
  "targets":[
@@ -44,6 +44,17 @@
     }
    },
    "conditions":[
+   [
+   	'with_openmp=="true"',
+   	{
+   	 "cflags":[
+   	  "-fopenmp"
+   	 ],
+   	 "libraries":[
+   	  "-lomp",
+   	 ]
+   	}
+    ],
     [
 	'with_cuda=="true"',
 	{
