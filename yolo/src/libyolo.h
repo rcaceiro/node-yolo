@@ -2,12 +2,16 @@
 #define LIBYOLO_H
 
 #include "darknet.h"
+#include "common.h"
+#include "stack.h"
 #include <unistd.h>
 #include <errno.h>
+#include <semaphore.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 typedef struct
 {
  char *class_name;
@@ -25,7 +29,7 @@ typedef struct
 typedef struct
 {
  yolo_detection_image detection_frame;
- double second;
+ double milisecond;
  long frame;
 }yolo_detection_frame;
 
@@ -48,6 +52,21 @@ typedef struct
  int error_code;
  char *error_message;
 }yolo_status_detailed;
+
+typedef struct
+{
+ sem_t *full;
+ sem_t *empty;
+ pthread_mutex_t mutex_stack;
+ pthread_mutex_t mutex_end;
+ bool end;
+
+ stack_node_t *stack;
+ yolo_object *yolo;
+ float thresh;
+ yolo_detection_video **yolo_detect;
+ void *video;
+}thread_data_t;
 
 typedef enum
 {
@@ -116,6 +135,10 @@ void yolo_detection_video_free(yolo_detection_video **yolo);
 void yolo_cleanup(yolo_object *yolo);
 
 yolo_status_detailed yolo_status_decode(yolo_status status);
+
+yolo_status parse_detections_video(yolo_object *yolo, detection *dets, yolo_detection_video **yolo_detect, float time_spent_for_classification, long frame_id, double milisecond, int nboxes, float thresh);
+void *thread_detect(void *data);
+yolo_status yolo_check_before_process_filename(yolo_object *yolo, char *filename);
 
 #ifdef __cplusplus
 };

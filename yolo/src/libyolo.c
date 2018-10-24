@@ -1,27 +1,8 @@
 #include "libyolo.h"
-#include "stack.h"
 #include <limits.h>
-#include <semaphore.h>
 #include <pthread.h>
 #include <fcntl.h>
 #include <opencv2/imgcodecs/imgcodecs_c.h>
-#include <opencv2/videoio/videoio_c.h>
-
-typedef struct
-{
- sem_t *full;
- sem_t *empty;
- pthread_mutex_t mutex_stack;
- pthread_mutex_t mutex_end;
- bool end;
-
- stack_node_t *stack;
- yolo_object *yolo;
- float thresh;
- yolo_detection_video **yolo_detect;
- CvCapture *video;
- double stream_fps;
-}thread_data_t;
 
 void fill_detect(yolo_object *yolo, detection *network_detection, int network_detection_index, detect *yolo_detect)
 {
@@ -96,7 +77,7 @@ yolo_status parse_detections_image(yolo_object *yolo, detection *dets, yolo_dete
  return fill_detection(yolo,dets,(*yolo_detect),time_spent_for_classification,nboxes,thresh);
 }
 
-yolo_status parse_detections_video(yolo_object *yolo, detection *dets, yolo_detection_video **yolo_detect, float time_spent_for_classification, long frame_id, double fps, int nboxes, float thresh)
+yolo_status parse_detections_video(yolo_object *yolo, detection *dets, yolo_detection_video **yolo_detect, float time_spent_for_classification, long frame_id, double milisecond, int nboxes, float thresh)
 {
  if((*yolo_detect) == NULL)
  {
@@ -114,33 +95,10 @@ yolo_status parse_detections_video(yolo_object *yolo, detection *dets, yolo_dete
  }
  video_detection->frame_detections=temp;
  video_detection->frame_detections[video_detection->count].frame=frame_id;
- video_detection->frame_detections[video_detection->count].second=frame_id/fps;
+ video_detection->frame_detections[video_detection->count].milisecond=milisecond;
  yolo_status yolo_stats=fill_detection(yolo,dets,&video_detection->frame_detections[video_detection->count].detection_frame,time_spent_for_classification,nboxes,thresh);
  ++video_detection->count;
  return yolo_stats;
-}
-
-image libyolo_ipl_to_image(IplImage *src)
-{
- int h=src->height;
- int w=src->width;
- int c=src->nChannels;
- image im=make_image(w, h, c);
- unsigned char *data=(unsigned char *)src->imageData;
- int step=src->widthStep;
- int i, j, k;
-
- for(i=0; i<h; ++i)
- {
-  for(k=0; k<c; ++k)
-  {
-   for(j=0; j<w; ++j)
-   {
-    im.data[k*w*h+i*w+j]=data[i*step+j*c+k]/255.;
-   }
-  }
- }
- return im;
 }
 
 void *thread_detect(void *data)
@@ -169,12 +127,15 @@ void *thread_detect(void *data)
   }
 
   image im;
+  long frame_number;
+  double milisecond;
+
   bool im_got_sucessfull;
   if(pthread_mutex_lock(&th_data->mutex_stack))
   {
    continue;
   }
-  im_got_sucessfull=stack_pop(&th_data->stack,&im);
+  im_got_sucessfull=stack_pop(&th_data->stack,&im,&frame_number,&milisecond);
   pthread_mutex_unlock(&th_data->mutex_stack);
   sem_post(th_data->empty);
 
@@ -203,39 +164,6 @@ void *thread_detect(void *data)
   free_detections(dets, nboxes);
   free_image(im);
   free_image(sized);
- }
- return NULL;
-}
-
-void *thread_capture(void *data)
-{
- if(data == NULL)
- {
-  return NULL;
- }
- thread_data_t *thread_data=data;
- IplImage *ipl_image=NULL;
-
- while(true)
- {
-  ipl_image=cvQueryFrame(thread_data->video);
-  if(ipl_image == NULL)
-  {
-   pthread_mutex_lock(&thread_data->mutex_end);
-   thread_data->end=true;
-   pthread_mutex_unlock(&thread_data->mutex_end);
-   break;
-  }
-  image yolo_image=libyolo_ipl_to_image(ipl_image);
-  sem_wait(thread_data->empty);
-  if(pthread_mutex_lock(&thread_data->mutex_stack))
-  {
-   sem_post(thread_data->empty);
-   continue;
-  }
-  stack_push(&thread_data->stack,yolo_image);
-  pthread_mutex_unlock(&thread_data->mutex_stack);
-  sem_post(thread_data->full);
  }
  return NULL;
 }
@@ -423,74 +351,6 @@ yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection_image **detect, 
  free_detections(dets, nboxes);
  free_image(im);
  free_image(sized);
-
- return yolo_ok;
-}
-
-yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, char *filename, float thresh)
-{
- yolo_status status=yolo_check_before_process_filename(yolo, filename);
- if(status != yolo_ok)
- {
-  return status;
- }
-
- pthread_t consumer;
- pthread_t producer;
- thread_data_t *thread_data=NULL;
- thread_data=calloc(1, sizeof(thread_data_t));
- if(thread_data == NULL)
- {
-  return yolo_video_cannot_alloc_base_structure;
- }
- thread_data->yolo_detect=detect;
- thread_data->yolo=yolo;
- thread_data->end=false;
- thread_data->thresh=thresh;
- if(pthread_mutex_init(&thread_data->mutex_stack, NULL))
- {
-  return yolo_video_cannot_alloc_base_structure;
- }
- if(pthread_mutex_init(&thread_data->mutex_end, NULL))
- {
-  return yolo_video_cannot_alloc_base_structure;
- }
- thread_data->empty=sem_open("/empty", O_CREAT, 0644, 10);
- if(thread_data->empty == SEM_FAILED)
- {
-  return yolo_video_cannot_alloc_base_structure;
- }
- thread_data->full=sem_open("/full", O_CREAT, 0644, 0);
- if(thread_data->full == SEM_FAILED)
- {
-  return yolo_video_cannot_alloc_base_structure;
- }
-
- thread_data->video=cvCaptureFromFile(filename);
- if(thread_data->video==NULL)
- {
-  return yolo_cannot_open_video_stream;
- }
-
- thread_data->stream_fps=cvGetCaptureProperty(thread_data->video,CV_CAP_PROP_FPS);
- if(pthread_create(&producer, NULL, thread_capture, thread_data))
- {
-  return yolo_video_cannot_alloc_base_structure;
- }
- if(pthread_create(&consumer, NULL, thread_detect, thread_data))
- {
-  return yolo_video_cannot_alloc_base_structure;
- }
-
- pthread_join(producer, NULL);
- cvReleaseCapture(&thread_data->video);
-
- pthread_join(consumer, NULL);
- sem_close(thread_data->full);
- sem_close(thread_data->empty);
- pthread_mutex_destroy(&thread_data->mutex_stack);
- pthread_mutex_destroy(&thread_data->mutex_end);
- free(thread_data);
 
  return yolo_ok;
 }
