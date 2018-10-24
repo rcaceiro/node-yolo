@@ -1,6 +1,6 @@
 GPU=0
 CUDNN=0
-OPENCV=$(shell pkg-config --exists opencv > /dev/null 2> /dev/null && echo 1 || echo 0)
+OPENCV=1
 OPENMP=0
 DEBUG=1
 
