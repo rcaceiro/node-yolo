@@ -88,11 +88,12 @@ yolo_status parse_detections_video(yolo_object *yolo, detection *dets, yolo_dete
   }
  }
  yolo_detection_video *video_detection=*yolo_detect;
- yolo_detection_frame *temp=realloc(video_detection->frame_detections, sizeof(yolo_detection_frame)+video_detection->count);
+ yolo_detection_frame *temp=realloc(video_detection->frame_detections, sizeof(yolo_detection_frame)*(video_detection->count+1));
  if(temp==NULL)
  {
   return yolo_cannot_alloc_yolo_detection;
  }
+ memset(temp+video_detection->count,0,sizeof(yolo_detection_frame));
  video_detection->frame_detections=temp;
  video_detection->frame_detections[video_detection->count].frame=frame_id;
  video_detection->frame_detections[video_detection->count].milisecond=milisecond;

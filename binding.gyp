@@ -18,7 +18,9 @@
    "include_dirs":[
     "<(module_root_dir)/yolo/src",
     "<(module_root_dir)/darknet/src",
-    "<(module_root_dir)/darknet/include"
+    "<(module_root_dir)/darknet/include",
+    "<(module_root_dir)/stack/",
+    "<(module_root_dir)/common/include"
    ],
    "cflags":[
     "-Wall",

@@ -1,10 +1,9 @@
-#include <opencv/cv.hpp>
-#include <bits/fcntl-linux.h>
-
+#include <opencv2/opencv.hpp>
+#include "darknet.h"
 extern "C" {
-#import <darknet.h>
-#import "libyolo.h"
+#include "libyolo.h"
 #include "stack.h"
+#include <fcntl.h>
 
 image libyolo_ipl_to_image(IplImage *src)
 {
