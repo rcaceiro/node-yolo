@@ -10,9 +10,14 @@
     "src/module.cpp"
    ],
    "libraries":[
-    "<(module_root_dir)/yolo/libyolo.a"
+    "<(module_root_dir)/yolo/libyolo.a",
+    "-lopencv_core",
+    "-lopencv_highgui",
+    "-lopencv_videoio",
+    "-lopencv_video"
    ],
    "defines":[
+    "OPENCV",
     "NAPI_DISABLE_CPP_EXCEPTIONS"
    ],
    "include_dirs":[
@@ -39,20 +44,6 @@
     }
    },
    "conditions":[
-   [
-   	'with_opencv=="true"',
-   	{
-   	 "defines":[
-   	  "OPENCV"
-   	 ],
-   	 "libraries":[
-   	  "-lopencv_core",
-       "-lopencv_highgui",
-       "-lopencv_videoio",
-       "-lopencv_video"
-   	 ],
-   	}
-    ],
     [
 	'with_cuda=="true"',
 	{
