@@ -1,6 +1,6 @@
 {
  "variables":{
-  "with_opencv%":"<!(node ./util/has_lib.js opencv)",
+  "with_opencv%":"true",
   "with_cuda%":"<!(node ./util/has_lib.js cuda)"
  },
  "targets":[
@@ -26,6 +26,7 @@
     "-Wall",
     "-Wfatal-errors",
     "-fPIC",
+    "-Ofast"
    ],
    "xcode_settings":{
     "GCC_ENABLE_CPP_EXCEPTIONS":"YES",
