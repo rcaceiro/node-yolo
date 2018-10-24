@@ -24,3 +24,4 @@
 
 **Closed issues:**
 - Getting Empty Array In Detections Instead Of Object [\#1](https://github.com/rcaceiro/node-yolo/issues/1)
+- Built with GPU stuff enabled but using CPU [\#3](https://github.com/rcaceiro/node-yolo/issues/3)
