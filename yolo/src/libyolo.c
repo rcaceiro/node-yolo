@@ -160,7 +160,7 @@ void *thread_detect(void *data)
    do_nms_sort(dets, l.side*l.side*l.n, l.classes, nms);
   }
 
-  parse_detections_video(th_data->yolo, dets, th_data->yolo_detect, sec(clock()-time), 0, th_data->stream_fps, nboxes, th_data->thresh);
+  parse_detections_video(th_data->yolo, dets, th_data->yolo_detect, sec(clock()-time), frame_number, milisecond, nboxes, th_data->thresh);
   free_detections(dets, nboxes);
   free_image(im);
   free_image(sized);
