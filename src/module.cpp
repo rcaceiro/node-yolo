@@ -185,7 +185,7 @@ yolo_status load_video_detection_object(napi_env env, yolo_detection_video *vide
  {
   napi_value object;
   napi_value frame_id;
-  napi_value second;
+  napi_value milisecond;
 
   if(napi_create_object(env,&object)!=napi_ok)
   {
@@ -197,7 +197,7 @@ yolo_status load_video_detection_object(napi_env env, yolo_detection_video *vide
    return yolo_napi_create_frame_failed;
   }
 
-  if(napi_create_double(env,video_detections->frame_detections[i].second,&second)!=napi_ok)
+  if(napi_create_double(env,video_detections->frame_detections[i].milisecond,&milisecond)!=napi_ok)
   {
    return yolo_napi_create_second_failed;
   }
@@ -207,7 +207,7 @@ yolo_status load_video_detection_object(napi_env env, yolo_detection_video *vide
    return yolo_napi_set_frame_to_object_failed;
   }
 
-  if(napi_set_named_property(env,object,"second",second)!=napi_ok)
+  if(napi_set_named_property(env,object,"milisecond",milisecond)!=napi_ok)
   {
    return yolo_napi_set_second_to_object_failed;
   }
