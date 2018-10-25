@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <fcntl.h>
 #include <opencv2/imgcodecs/imgcodecs_c.h>
+#include <sys/time.h>
 
 void fill_detect(yolo_object *yolo, detection *network_detection, int network_detection_index, detect *yolo_detect)
 {
@@ -146,12 +147,12 @@ void *thread_detect(void *data)
   }
 
   layer l=th_data->yolo->net->layers[th_data->yolo->net->n-1];
-  clock_t time;
+  unsigned long long time;
   float nms=0.45;
 
   image sized=resize_image(im, th_data->yolo->net->w, th_data->yolo->net->h);
   float *X=sized.data;
-  time=clock();
+  time=unixTimeMilis();
   network_predict(th_data->yolo->net, X);
 
   int nboxes=0;
@@ -161,7 +162,7 @@ void *thread_detect(void *data)
    do_nms_sort(dets, l.side*l.side*l.n, l.classes, nms);
   }
 
-  parse_detections_video(th_data->yolo, dets, th_data->yolo_detect, sec(clock()-time), frame_number, milisecond, nboxes, th_data->thresh);
+  parse_detections_video(th_data->yolo, dets, th_data->yolo_detect, unixTimeMilis()-time, frame_number, milisecond, nboxes, th_data->thresh);
   free_detections(dets, nboxes);
   free_image(im);
   free_image(sized);
@@ -327,13 +328,13 @@ yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection_image **detect, 
  cvReleaseMat(&mat);
 
  layer l=yolo->net->layers[yolo->net->n-1];
- clock_t time;
+ unsigned long long time;
  float nms=0.45;
 
  image im=load_image_color(filename, 0, 0);
  image sized=resize_image(im, yolo->net->w, yolo->net->h);
  float *X=sized.data;
- time=clock();
+ time=unixTimeMilis();
  network_predict(yolo->net, X);
 
  int nboxes=0;
@@ -343,7 +344,7 @@ yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection_image **detect, 
   do_nms_sort(dets, l.side*l.side*l.n, l.classes, nms);
  }
 
- status=parse_detections_image(yolo, dets, detect, sec(clock()-time), nboxes, thresh);
+ status=parse_detections_image(yolo, dets, detect, unixTimeMilis()-time, nboxes, thresh);
  if(status != yolo_ok)
  {
   return status;
@@ -474,4 +475,14 @@ yolo_status_detailed yolo_status_decode(yolo_status status)
    status_detailed.error_message="Unknow error";
  }
  return status_detailed;
+}
+
+unsigned long long unixTimeMilis()
+{
+ struct timeval tv;
+
+ gettimeofday(&tv, NULL);
+
+ return (unsigned long long)(tv.tv_sec) * 1000 +
+        (unsigned long long)(tv.tv_usec) / 1000;
 }

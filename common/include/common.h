@@ -9,4 +9,6 @@ typedef struct
  double milisecond;
  image frame;
 }stack_type_t;
+
+unsigned long long unixTimeMilis();
 #endif
