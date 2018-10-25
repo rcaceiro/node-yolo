@@ -6,7 +6,7 @@ It allow you to use a state-of-the-art, real-time object detection system called
   If you use this branch please be careful you have some instabilities and check for frequent updates.**
 ### Pre-requirements
 * C/C++ Compiler (tested with gcc & g++)
-* Nvidia graphic card (Only if you want to use GPU acceleration):
+* nVidia graphic card (Only if you want to use GPU acceleration):
 	* [CUDA](https://developer.nvidia.com/cuda-zone)
 	* [CuDNN](https://developer.nvidia.com/cudnn)
 * [Node.js](https://nodejs.org/en/) (tested on node.js>= 8)
@@ -75,13 +75,13 @@ You need to create two folder, cfg and data and put the files for each one. Like
 | `frame` | `long/int64` | number of the frame
 | `milisecond` | `double` | the second that frame appear on video
 | `timeSpentForClassification` | `double` | time used to classifies one frame
-| `detections` | `array` | array of detections object, containing all detections 
+| `detections` | `array` | array of `detections` object, containing all detections 
 
 #### image detection object
 | **Field** | **Type** | **Description**
 |:----------|:---------|:-----------------------------------------------------
 | `timeSpentForClassification` | `double` | time used to classifies one image
-| `detections` | `array` | array of detections object, containing all detections 
+| `detections` | `array` | array of `detections` object, containing all detections 
 
 #### detections object
 | **Field** | **Type** | **Description**
@@ -100,4 +100,4 @@ You need to create two folder, cfg and data and put the files for each one. Like
 
 \* To get that metrics we calculate the usage for video with 3 hours at 60fps.
 <br>\**If you do not use gpu, may should consider a processor with higher number of cores.
-<br>\***The weaker GPU graphics card used was a nVidia GTX960M
+<br>\***The weaker graphics card used was a nVidia GTX960M
