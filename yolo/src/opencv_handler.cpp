@@ -80,6 +80,7 @@ void *thread_capture(void *data)
 
 yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, char *filename, float thresh)
 {
+ unsigned long long start = unixTimeMilis();
  yolo_status status=yolo_check_before_process_filename(yolo, filename);
  if(status != yolo_ok)
  {
@@ -144,7 +145,7 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  pthread_mutex_destroy(&thread_data->mutex_stack);
  pthread_mutex_destroy(&thread_data->mutex_end);
  free(thread_data);
-
+ printf("Process video took %llu",unixTimeMilis()-start);
  return yolo_ok;
 }
 };
