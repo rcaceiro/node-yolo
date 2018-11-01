@@ -2,11 +2,12 @@
 #define LIBYOLO_H
 
 #include "darknet.h"
-#include "common.h"
-#include "stack.h"
+#include "yolo_error.h"
 #include <unistd.h>
 #include <errno.h>
 #include <semaphore.h>
+#include <deque>
+#include <opencv2/opencv.hpp>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,96 +50,74 @@ typedef struct
 
 typedef struct
 {
- int error_code;
- char *error_message;
-}yolo_status_detailed;
+ long frame_number;
+ double milisecond;
+ image frame;
+}queue_image_t;
+
+typedef struct
+{
+ long frame_number;
+ double milisecond;
+ float time_spent_for_classification;
+ detection *frame_detections;
+ int nboxes;
+}queue_detection_t;
+
+typedef struct
+{
+ pthread_mutex_t mutex_end;
+ bool end;
+}thread_common_t;
 
 typedef struct
 {
  sem_t *full;
  sem_t *empty;
- pthread_mutex_t mutex_stack;
- pthread_mutex_t mutex_end;
- bool end;
+ pthread_mutex_t mutex;
+ std::deque<queue_image_t> queue;
+}thread_image_queue_t;
 
- stack_node_t *stack;
+typedef struct
+{
+ sem_t *full;
+ sem_t *empty;
+ pthread_mutex_t mutex;
+ std::deque<queue_detection_t> queue;
+
  yolo_object *yolo;
  float thresh;
- yolo_detection_video **yolo_detect;
- void *video;
-}thread_data_t;
+}thread_detections_queue_t;
 
-typedef enum
+typedef struct
 {
- yolo_ok,
- yolo_instanciation,
- yolo_cannot_alloc_node_yolo_object,
- yolo_cannot_alloc_map,
- yolo_cannot_alloc_yolo_detection,
- yolo_cannot_realloc_detect,
- yolo_cannot_change_to_working_dir,
- yolo_object_is_not_initialized,
- yolo_working_dir_is_not_exists,
- yolo_datacfg_is_not_exists,
- yolo_cfgfile_is_not_exists,
- yolo_weight_file_is_not_exists,
- yolo_working_dir_is_not_readable,
- yolo_datacfg_is_not_readable,
- yolo_cfgfile_is_not_readable,
- yolo_weight_file_is_not_readable,
- yolo_names_file_is_not_exists,
- yolo_names_file_is_not_readable,
- yolo_image_file_is_not_exists,
- yolo_image_file_is_not_readable,
- yolo_image_file_is_corrupted,
+ thread_common_t *common;
+ thread_image_queue_t *image_queue;
+ cv::VideoCapture *video;
+}thread_get_frame_t;
 
- yolo_video_cannot_alloc_base_structure,
- yolo_cannot_open_video_stream,
+typedef struct
+{
+ thread_common_t *common;
+ thread_image_queue_t *image_queue;
+ thread_detections_queue_t *detections_queue;
+}thread_processing_image_t;
 
- yolo_napi_create_main_object_failed,
- yolo_napi_create_array_failed,
- yolo_napi_set_array_property_failed,
- yolo_napi_create_object_failed,
- yolo_napi_set_object_to_array_failed,
- yolo_napi_create_class_name_string_failed,
- yolo_napi_set_class_name_property_failed,
- yolo_napi_create_probability_double_failed,
- yolo_napi_set_probability_property_failed,
- yolo_napi_create_box_object_failed,
- yolo_napi_set_box_property_failed,
- yolo_napi_create_frame_failed,
- yolo_napi_set_frame_to_object_failed,
- yolo_napi_create_second_failed,
- yolo_napi_set_second_to_object_failed,
+typedef struct
+{
+ thread_common_t *common;
+ thread_detections_queue_t *detections_queue;
 
- yolo_napi_create_box_x_double_failed,
- yolo_napi_create_box_x_named_property_failed,
- yolo_napi_create_box_y_double_failed,
- yolo_napi_create_box_y_named_property_failed,
- yolo_napi_create_box_w_double_failed,
- yolo_napi_create_box_w_named_property_failed,
- yolo_napi_create_box_h_double_failed,
- yolo_napi_create_box_h_named_property_failed,
- yolo_napi_create_object_time_spent_for_classification_double_failed,
- yolo_napi_create_object_time_spent_for_classification_named_property_failed,
-
- yolo_unknow_error
-}yolo_status;
+ yolo_detection_video **yolo_detect;
+}thread_processing_detections_t;
 
 yolo_status yolo_init(yolo_object **yolo_obj, char *workingDir, char *datacfg, char *cfgfile, char *weightfile);
-
 yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection_image **detect, char *filename, float thresh);
 yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, char *filename, float thresh);
 
 void yolo_detection_image_free(yolo_detection_image **yolo);
 void yolo_detection_video_free(yolo_detection_video **yolo);
 void yolo_cleanup(yolo_object *yolo);
-
-yolo_status_detailed yolo_status_decode(yolo_status status);
-
-yolo_status parse_detections_video(yolo_object *yolo, detection *dets, yolo_detection_video **yolo_detect, float time_spent_for_classification, long frame_id, double milisecond, int nboxes, float thresh);
-void *thread_detect(void *data);
-yolo_status yolo_check_before_process_filename(yolo_object *yolo, char *filename);
 
 #ifdef __cplusplus
 };
