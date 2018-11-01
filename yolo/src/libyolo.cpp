@@ -1,8 +1,11 @@
 #include "libyolo.h"
+#include "private_structs.h"
+
 #include <limits.h>
 #include <pthread.h>
 #include <fcntl.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 void fill_detect(yolo_object *yolo, detection *network_detection, int network_detection_index, detect *yolo_detect)
 {

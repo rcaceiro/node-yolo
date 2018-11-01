@@ -15,4 +15,4 @@ ADD_COMPILE_DEFINITIONS(OPENCV)
 
 ADD_EXECUTABLE(node-yolo
 			yolo/src/libyolo.h
-			yolo/src/libyolo.cpp src/module.cpp src/module.h yolo/src/yolo_error.c yolo/src/yolo_error.h)
+			yolo/src/libyolo.cpp src/module.cpp src/module.h yolo/src/yolo_error.c yolo/src/yolo_error.h yolo/src/private_structs.h)
