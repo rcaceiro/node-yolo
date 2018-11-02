@@ -38,33 +38,6 @@ typedef enum
  yolo_video_cannot_alloc_base_structure,
  yolo_cannot_open_video_stream,
 
- // yolo_napi_create_main_object_failed,
- // yolo_napi_create_array_failed,
- // yolo_napi_set_array_property_failed,
- // yolo_napi_create_object_failed,
- // yolo_napi_set_object_to_array_failed,
- // yolo_napi_create_class_name_string_failed,
- // yolo_napi_set_class_name_property_failed,
- // yolo_napi_create_probability_double_failed,
- // yolo_napi_set_probability_property_failed,
- // yolo_napi_create_box_object_failed,
- // yolo_napi_set_box_property_failed,
- // yolo_napi_create_frame_failed,
- // yolo_napi_set_frame_to_object_failed,
- // yolo_napi_create_second_failed,
- // yolo_napi_set_second_to_object_failed,
- //
- // yolo_napi_create_box_x_double_failed,
- // yolo_napi_create_box_x_named_property_failed,
- // yolo_napi_create_box_y_double_failed,
- // yolo_napi_create_box_y_named_property_failed,
- // yolo_napi_create_box_w_double_failed,
- // yolo_napi_create_box_w_named_property_failed,
- // yolo_napi_create_box_h_double_failed,
- // yolo_napi_create_box_h_named_property_failed,
- // yolo_napi_create_object_time_spent_for_classification_double_failed,
- // yolo_napi_create_object_time_spent_for_classification_named_property_failed,
-
  yolo_unknow_error
 }yolo_status;
 
