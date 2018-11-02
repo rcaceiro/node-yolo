@@ -7,7 +7,8 @@
   {
    "target_name":"nodeyolo",
    "sources":[
-    "src/module.cpp"
+    "src/module.cpp",
+    "src/napi_yolo_errors.c"
    ],
    "libraries":[
     "<(module_root_dir)/yolo/libyolo.a",

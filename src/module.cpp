@@ -1,4 +1,5 @@
 #include "module.h"
+#include "napi_yolo_errors.h"
 #include <cassert>
 
 napi_status get_string_value(napi_env env, napi_value args[], size_t index, char **value, size_t value_size)
@@ -31,7 +32,27 @@ napi_status get_string_value(napi_env env, napi_value args[], size_t index, char
  return napi_ok;
 }
 
-yolo_status load_box_object(napi_env env, box img_box, napi_value jsbox)
+napi_status get_double_value(napi_env env, napi_value args[], size_t index, double *value)
+{
+ napi_status status;
+ napi_valuetype value_type;
+ status=napi_typeof(env, args[index], &value_type);
+ if(status != napi_ok)
+ {
+  return napi_invalid_arg;
+ }
+
+ if(value_type != napi_number)
+ {
+  return napi_number_expected;
+ }
+
+ status=napi_get_value_double(env, args[index], value);
+ assert(status == napi_ok);
+ return napi_ok;
+}
+
+yolo_napi_status load_box_object(napi_env env, box img_box, napi_value jsbox)
 {
  napi_status status;
  napi_value x, y, w, h;
@@ -79,10 +100,10 @@ yolo_status load_box_object(napi_env env, box img_box, napi_value jsbox)
  {
   return yolo_napi_create_box_h_named_property_failed;
  }
- return yolo_ok;
+ return yolo_napi_ok;
 }
 
-yolo_status load_detections(napi_env env, yolo_detection_image *img_detections, napi_value jsarray)
+yolo_napi_status load_detections(napi_env env, yolo_detection_image *img_detections, napi_value jsarray)
 {
  napi_status status;
  napi_value jsobj, box_object, classes, prob;
@@ -129,7 +150,7 @@ yolo_status load_detections(napi_env env, yolo_detection_image *img_detections, 
    return yolo_napi_set_box_property_failed;
   }
 
-  if(load_box_object(env, det.bbox, box_object) == yolo_ok)
+  if(load_box_object(env, det.bbox, box_object) == yolo_napi_ok)
   {
    status=napi_set_element(env, jsarray, (uint32_t)i, jsobj);
    if(status != napi_ok)
@@ -138,14 +159,14 @@ yolo_status load_detections(napi_env env, yolo_detection_image *img_detections, 
    }
   }
  }
- return yolo_ok;
+ return yolo_napi_ok;
 }
 
-yolo_status load_detection_object(napi_env env, yolo_detection_image *img_detections, napi_value object)
+yolo_napi_status load_detection_object(napi_env env, yolo_detection_image *img_detections, napi_value object)
 {
  napi_value js_detections_array;
  napi_value js_time_spent_for_classification;
- yolo_status yolo_stats;
+ yolo_napi_status yolo_stats;
 
  if(napi_create_double(env,img_detections->time_spent_for_classification,&js_time_spent_for_classification)!=napi_ok)
  {
@@ -164,7 +185,7 @@ yolo_status load_detection_object(napi_env env, yolo_detection_image *img_detect
 
  yolo_stats=load_detections(env, img_detections, js_detections_array);
 
- if(yolo_stats!=yolo_ok)
+ if(yolo_stats != yolo_napi_ok)
  {
   return yolo_stats;
  }
@@ -174,12 +195,12 @@ yolo_status load_detection_object(napi_env env, yolo_detection_image *img_detect
   return yolo_napi_create_object_time_spent_for_classification_named_property_failed;
  }
 
- return yolo_ok;
+ return yolo_napi_ok;
 }
 
-yolo_status load_video_detection_object(napi_env env, yolo_detection_video *video_detections, napi_value frames_array)
+yolo_napi_status load_video_detection_object(napi_env env, yolo_detection_video *video_detections, napi_value frames_array)
 {
- yolo_status yolo_stats;
+ yolo_napi_status yolo_stats;
 
  for(size_t i=0; i<video_detections->count; ++i)
  {
@@ -213,7 +234,7 @@ yolo_status load_video_detection_object(napi_env env, yolo_detection_video *vide
   }
 
   yolo_stats=load_detection_object(env,&video_detections->frame_detections[i].detection_frame,object);
-  if(yolo_stats!=yolo_ok)
+  if(yolo_stats != yolo_napi_ok)
   {
    return yolo_napi_create_main_object_failed;
   }
@@ -224,13 +245,13 @@ yolo_status load_video_detection_object(napi_env env, yolo_detection_video *vide
   }
  }
 
- return yolo_ok;
+ return yolo_napi_ok;
 }
 
-void reject(napi_env env, yolo_status yolo_stats, data_holder *holder)
+void reject(napi_env env, yolo_napi_status yolo_stats, data_holder *holder)
 {
  napi_value error;
- yolo_status_detailed status_detailed=yolo_status_decode(yolo_stats);
+ yolo_napi_status_detailed status_detailed=yolo_napi_status_decode(yolo_stats, &holder->yolo_stats);
  if(napi_create_object(env, &error) == napi_ok)
  {
   napi_value string_error;
@@ -243,6 +264,11 @@ void reject(napi_env env, yolo_status yolo_stats, data_holder *holder)
   {
    napi_set_named_property(env, error, "errorCode", error_code);
   }
+  napi_value error_prefix;
+  if(napi_create_string_utf8(env, status_detailed.error_prefix, strlen(status_detailed.error_message), &error_prefix) == napi_ok)
+  {
+   napi_set_named_property(env, error, "errorPrefix", error_prefix);
+  }
  }
  napi_reject_deferred(env, holder->deferred, error);
 }
@@ -251,17 +277,22 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
 {
  auto *holder=static_cast<data_holder *>(data);
  napi_value return_value;
- yolo_status yolo_stats;
+ yolo_napi_status yolo_stats;
+
+ if(holder->yolo_stats != yolo_ok)
+ {
+  reject(env, yolo_napi_error_from_libyolo, holder);
+ }
 
  if(status!=napi_ok)
  {
-  reject(env,yolo_unknow_error,holder);
+  reject(env, yolo_napi_unknow_error, holder);
   return;
  }
 
  if(holder->img_detection==nullptr&&holder->video_detection==nullptr)
  {
-  reject(env,yolo_unknow_error,holder);
+  reject(env, yolo_napi_unknow_error, holder);
   return;
  }
 
@@ -275,7 +306,7 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
   {
    yolo_stats=load_detection_object(env,holder->img_detection,return_value);
 
-   if(yolo_stats == yolo_ok)
+   if(yolo_stats == yolo_napi_ok)
    {
     napi_resolve_deferred(env, holder->deferred, return_value);
    }
@@ -296,7 +327,7 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
   {
    yolo_stats=load_video_detection_object(env,holder->video_detection,return_value);
 
-   if(yolo_stats == yolo_ok)
+   if(yolo_stats == yolo_napi_ok)
    {
     napi_resolve_deferred(env, holder->deferred, return_value);
    }
@@ -323,7 +354,7 @@ void async_detect_image(napi_env env, void *data)
  if(holder->yolo->created)
  {
   holder->yolo->mutex_lock();
-  holder->yolo_stats=yolo_detect_image(holder->yolo->yolo, &holder->img_detection, holder->image_path, 0.50);
+  holder->yolo_stats=yolo_detect_image(holder->yolo->yolo, &holder->img_detection, holder->image_path, holder->thresh_value);
   holder->yolo->mutex_unlock();
  }
  else
@@ -339,7 +370,7 @@ void async_detect_video(napi_env env, void *data)
  if(holder->yolo->created)
  {
   holder->yolo->mutex_lock();
-  holder->yolo_stats=yolo_detect_video(holder->yolo->yolo, &holder->video_detection, holder->image_path, 0.50);
+  holder->yolo_stats=yolo_detect_video(holder->yolo->yolo, &holder->video_detection, holder->image_path, holder->thresh_value);
   holder->yolo->mutex_unlock();
  }
  else
@@ -379,7 +410,8 @@ void Yolo::Destructor(napi_env env, void *nativeObject, void * /*finalize_hint*/
 napi_value Yolo::Init(napi_env env, napi_value exports)
 {
  napi_status status;
- napi_property_descriptor properties[]={{"detectImage", nullptr, Yolo::DetectImage, nullptr, nullptr, nullptr, napi_default, nullptr},{"detectVideo", nullptr, Yolo::DetectVideo, nullptr, nullptr, nullptr, napi_default, nullptr}};
+ napi_property_descriptor properties[]={{"detectImage\0", nullptr, Yolo::DetectImage, nullptr, nullptr, nullptr, napi_default, nullptr},
+                                        {"detectVideo\0", nullptr, Yolo::DetectVideo, nullptr, nullptr, nullptr, napi_default, nullptr}};
 
  napi_value cons;
  status=napi_define_class(env, "Yolo\0", NAPI_AUTO_LENGTH, Yolo::New, nullptr, 2, properties, &cons);
@@ -466,9 +498,9 @@ napi_value Yolo::DetectImage(napi_env env, napi_callback_info info)
   return nullptr;
  }
 
- if(argc<1)
+ if(argc<2)
  {
-  napi_throw_error(env, "01", "You have to pass the path to image as parameter");
+  napi_throw_error(env, "01", "You have to pass the path to image and thresh value as parameters");
   return nullptr;
  }
 
@@ -478,6 +510,14 @@ napi_value Yolo::DetectImage(napi_env env, napi_callback_info info)
  if(image_path == nullptr)
  {
   napi_throw_error(env, "02", "Cannot get image path");
+  return nullptr;
+ }
+
+ double thresh=0.5;
+ status=get_double_value(env, args, 1, &thresh);
+ if(status != napi_ok)
+ {
+  napi_throw_error(env, "04", "Cannot get thresh value");
   return nullptr;
  }
 
@@ -505,6 +545,7 @@ napi_value Yolo::DetectImage(napi_env env, napi_callback_info info)
 
  holder->deferred=deferred;
  holder->image_path=image_path;
+ holder->thresh_value=(float)thresh;
  holder->yolo=yolo_obj;
  holder->resource=resource;
 
@@ -532,18 +573,25 @@ napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
   return nullptr;
  }
 
- if(argc<1)
+ if(argc<2)
  {
-  napi_throw_error(env, "01", "You have to pass the path to image as parameter");
+  napi_throw_error(env, "01", "You have to pass the path to image and thresh value as parameters");
   return nullptr;
  }
 
  char *video_path=nullptr;
  status=get_string_value(env, args, 0, &video_path, 0);
- assert(status == napi_ok);
- if(video_path == nullptr)
+ if(status != napi_ok || video_path == nullptr)
  {
   napi_throw_error(env, "02", "Cannot get video path");
+  return nullptr;
+ }
+
+ double thresh=0.5;
+ status=get_double_value(env, args, 1, &thresh);
+ if(status != napi_ok)
+ {
+  napi_throw_error(env, "04", "Cannot get thresh value");
   return nullptr;
  }
 
@@ -571,6 +619,7 @@ napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
 
  holder->deferred=deferred;
  holder->image_path=video_path;
+ holder->thresh_value=(float)thresh;
  holder->yolo=yolo_obj;
  holder->resource=resource;
 
