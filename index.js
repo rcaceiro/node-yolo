@@ -17,7 +17,7 @@ let obj = new yolo_addon("./darknet", "./cfg/coco.data", "./cfg/yolov3-spp.cfg",
 let isMac = process.platform === "darwin";
 
 if (isMac) {
-    obj.detectImage("./darknet/data/kite.jpg")
+    obj.detectImage("./darknet/data/kite.jpg", 0.5)
         .then((detections) => {
             console.log(JSON.stringify(detections));
         })
@@ -27,7 +27,7 @@ if (isMac) {
 }
 else {
     if (process.argv[2] !== undefined) {
-        obj.detectVideo(process.argv[2])
+        obj.detectVideo(process.argv[2], 0.5)
             .then((detections) => {
                 console.log(JSON.stringify(detections));
             })
