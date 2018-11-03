@@ -54,6 +54,10 @@ typedef struct
  thread_common_t *common;
  thread_image_queue_t *image_queue;
  cv::VideoCapture *video;
+
+ unsigned long long int total_milis;
+ unsigned long int number_of_samples;
+ pthread_mutex_t mutex;
 }thread_get_frame_t;
 
 typedef struct
@@ -61,6 +65,9 @@ typedef struct
  thread_common_t *common;
  thread_image_queue_t *image_queue;
  thread_detections_queue_t *detections_queue;
+
+ unsigned long long int total_milis;
+ unsigned long int number_of_samples;
 }thread_processing_image_t;
 
 typedef struct
@@ -69,6 +76,10 @@ typedef struct
  thread_detections_queue_t *detections_queue;
 
  yolo_detection_video **yolo_detect;
+
+ unsigned long long int total_milis;
+ unsigned long int number_of_samples;
+ pthread_mutex_t mutex;
 }thread_processing_detections_t;
 
 #endif //NODE_YOLO_PRIVATE_STRUCTS_H

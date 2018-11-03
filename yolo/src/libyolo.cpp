@@ -155,6 +155,8 @@ void *thread_process_detections(void *data)
 
  while(true)
  {
+  unsigned long long int startTime=unixTimeMilis();
+
   if(sem_trywait(thread_data->detections_queue->full))
   {
    bool end;
@@ -192,6 +194,11 @@ void *thread_process_detections(void *data)
   }
   parse_detections_video(thread_data->detections_queue->yolo, queue_detection.frame_detections, thread_data->yolo_detect, queue_detection.time_spent_for_classification, queue_detection.frame_number, queue_detection.milisecond, queue_detection.nboxes, thread_data->detections_queue->thresh);
   free_detections(queue_detection.frame_detections,queue_detection.nboxes);
+
+  pthread_mutex_lock(&thread_data->mutex);
+  thread_data->number_of_samples++;
+  thread_data->total_milis+=(unixTimeMilis()-startTime);
+  pthread_mutex_unlock(&thread_data->mutex);
  }
  return nullptr;
 }
@@ -207,6 +214,8 @@ void *thread_capture(void *data)
 
  while(true)
  {
+  unsigned long long int startTime=unixTimeMilis();
+
   if(!thread_data->video->isOpened())
   {
    pthread_mutex_lock(&thread_data->common->mutex_end);
@@ -240,6 +249,11 @@ void *thread_capture(void *data)
   pthread_mutex_unlock(&thread_data->image_queue->mutex);
   sem_post(thread_data->image_queue->full);
   mat.release();
+
+  pthread_mutex_lock(&thread_data->mutex);
+  thread_data->number_of_samples++;
+  thread_data->total_milis+=(unixTimeMilis()-startTime);
+  pthread_mutex_unlock(&thread_data->mutex);
  }
  return nullptr;
 }
@@ -253,6 +267,8 @@ void *thread_detect(void *data)
  auto *th_data=(thread_processing_image_t *)data;
  while(true)
  {
+  unsigned long long int startTime=unixTimeMilis();
+
   if(sem_trywait(th_data->image_queue->full))
   {
    bool end;
@@ -324,6 +340,9 @@ void *thread_detect(void *data)
 
   free_image(queue_image.frame);
   free_image(sized);
+
+  th_data->number_of_samples++;
+  th_data->total_milis+=(unixTimeMilis()-startTime);
  }
  return nullptr;
 }
@@ -551,6 +570,22 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  data_get_image.image_queue=data_process_image.image_queue=&image_queue;
  data_process_image.detections_queue=data_processing_detection.detections_queue=&detections_queue;
 
+ //TEMP////////////////////////////////////////////////////////////////
+ data_get_image.total_milis=0;
+ data_get_image.number_of_samples=0;
+ if(pthread_mutex_init(&data_get_image.mutex, nullptr))
+ {
+  return yolo_video_cannot_alloc_base_structure;
+ }
+
+ data_processing_detection.total_milis=0;
+ data_processing_detection.number_of_samples=0;
+ if(pthread_mutex_init(&data_processing_detection.mutex, nullptr))
+ {
+  return yolo_video_cannot_alloc_base_structure;
+ }
+ //////////////////////////////////////////////////////////////////////////
+
  if(pthread_mutex_init(&data_common.mutex_end, nullptr))
  {
   return yolo_video_cannot_alloc_base_structure;
@@ -642,7 +677,15 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  pthread_mutex_destroy(&data_common.mutex_end);
  detections_queue.queue.clear();
 
- printf("Process video took %llu", unixTimeMilis()-start);
+ //TEMP///////////////////////////////////////////////////////
+ pthread_mutex_destroy(&data_get_image.mutex);
+ pthread_mutex_destroy(&data_processing_detection.mutex);
+ ///////////////////////////////////////////////////////////
+
+ printf("Process video took %llu\n", unixTimeMilis()-start);
+ printf("Process get frames took around%lf\n", data_get_image.total_milis/(1.0f*data_get_image.number_of_samples));
+ printf("Process process images took around %lf\n", data_process_image.total_milis/(1.0f*data_process_image.number_of_samples));
+ printf("Process process detections took around %lf\n", data_processing_detection.total_milis/(1.0f*data_processing_detection.number_of_samples));
  return yolo_ok;
 }
 
