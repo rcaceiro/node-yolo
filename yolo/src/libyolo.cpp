@@ -562,13 +562,13 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  image_queue.queue=std::deque<queue_image_t>();
  detections_queue.queue=std::deque<queue_detection_t>();
 
- data_process_image.detections_queue->yolo=yolo;
- data_process_image.detections_queue->thresh=thresh;
- data_processing_detection.yolo_detect=detect;
-
  data_get_image.common=data_process_image.common=data_processing_detection.common=&data_common;
  data_get_image.image_queue=data_process_image.image_queue=&image_queue;
  data_process_image.detections_queue=data_processing_detection.detections_queue=&detections_queue;
+
+ data_process_image.detections_queue->yolo=yolo;
+ data_process_image.detections_queue->thresh=thresh;
+ data_processing_detection.yolo_detect=detect;
 
  //TEMP////////////////////////////////////////////////////////////////
  data_get_image.total_milis=0;
