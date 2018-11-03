@@ -233,19 +233,19 @@ void *thread_capture(void *data)
    break;
   }
   image yolo_image=libyolo_mat_to_image(mat);
+
+  queue_image_t queue_image;
+  queue_image.milisecond=thread_data->video->get(CV_CAP_PROP_POS_MSEC);
+  queue_image.frame_number=(long)thread_data->video->get(CV_CAP_PROP_POS_FRAMES);
+  queue_image.frame=yolo_image;
+
   sem_wait(thread_data->image_queue->empty);
   if(pthread_mutex_lock(&thread_data->image_queue->mutex))
   {
    sem_post(thread_data->image_queue->empty);
    continue;
   }
-
-  queue_image_t queue_image;
-  queue_image.milisecond=thread_data->video->get(CV_CAP_PROP_POS_MSEC);
-  queue_image.frame_number=(long)thread_data->video->get(CV_CAP_PROP_POS_FRAMES);
-  queue_image.frame=yolo_image;
   thread_data->image_queue->queue.push_back(queue_image);
-
   pthread_mutex_unlock(&thread_data->image_queue->mutex);
   sem_post(thread_data->image_queue->full);
   mat.release();
