@@ -488,8 +488,8 @@ napi_value Yolo::DetectImage(napi_env env, napi_callback_info info)
  napi_deferred deferred;
  napi_value promise;
  napi_value jsthis;
- size_t argc=1;
- napi_value args[1];
+ size_t argc=2;
+ napi_value args[2];
 
  status=napi_get_cb_info(env, info, &argc, args, &jsthis, nullptr);
  if(status != napi_ok)
@@ -563,8 +563,8 @@ napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
  napi_deferred deferred;
  napi_value promise;
  napi_value jsthis;
- size_t argc=1;
- napi_value args[1];
+ size_t argc=2;
+ napi_value args[2];
 
  status=napi_get_cb_info(env, info, &argc, args, &jsthis, nullptr);
  if(status != napi_ok)
