@@ -669,7 +669,7 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  {
   pthread_join(process_detections_thread[i], nullptr);
  }
- free(capture_image_thread);
+ free(process_detections_thread);
  yolo_cleanup(yolo);
  sem_close(detections_queue.full);
  sem_close(detections_queue.empty);
