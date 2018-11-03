@@ -697,7 +697,7 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  ///////////////////////////////////////////////////////////
 
  printf("Process video took %llu\n", unixTimeMilis()-start);
- printf("Process get frames took around%lf\n", data_get_image.total_milis/(1.0f*data_get_image.number_of_samples));
+ printf("Process get frames took around %lf\n", data_get_image.total_milis/(1.0f*data_get_image.number_of_samples));
  printf("Process process images took around %lf\n", data_process_image.total_milis/(1.0f*data_process_image.number_of_samples));
  printf("Process process detections took around %lf\n", data_processing_detection.total_milis/(1.0f*data_processing_detection.number_of_samples));
  return yolo_ok;
