@@ -705,7 +705,7 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
 
 void yolo_detect_free(yolo_detection_image *yolo_det)
 {
- for(int i=0; i<yolo_det->num_boxes; i++)
+ for(size_t i=0; i<yolo_det->num_boxes; i++)
  {
   free(yolo_det->detection[i].class_name);
  }
@@ -730,7 +730,7 @@ void yolo_detection_video_free(yolo_detection_video **yolo)
  {
   return;
  }
- for(int i=0; i<yolo_det->count; ++i)
+ for(size_t i=0; i<yolo_det->count; ++i)
  {
   yolo_detect_free(&yolo_det->frame_detections[i].detection_frame);
  }
