@@ -160,12 +160,12 @@ void *thread_process_detections(void *data)
   if(sem_trywait(thread_data->detections_queue->full))
   {
    bool end;
-   if(pthread_mutex_lock(&thread_data->common->mutex_end) != 0)
+   if(pthread_mutex_lock(&thread_data->detections_queue->common->mutex_end) != 0)
    {
     continue;
    }
-   end=thread_data->common->end;
-   pthread_mutex_unlock(&thread_data->common->mutex_end);
+   end=thread_data->detections_queue->common->end;
+   pthread_mutex_unlock(&thread_data->detections_queue->common->mutex_end);
    if(end)
    {
     break;
@@ -218,18 +218,18 @@ void *thread_capture(void *data)
 
   if(!thread_data->video->isOpened())
   {
-   pthread_mutex_lock(&thread_data->common->mutex_end);
-   thread_data->common->end=true;
-   pthread_mutex_unlock(&thread_data->common->mutex_end);
+   pthread_mutex_lock(&thread_data->image_queue->common->mutex_end);
+   thread_data->image_queue->common->end=true;
+   pthread_mutex_unlock(&thread_data->image_queue->common->mutex_end);
    break;
   }
 
   (*thread_data->video)>>mat;
   if(mat.empty())
   {
-   pthread_mutex_lock(&thread_data->common->mutex_end);
-   thread_data->common->end=true;
-   pthread_mutex_unlock(&thread_data->common->mutex_end);
+   pthread_mutex_lock(&thread_data->image_queue->common->mutex_end);
+   thread_data->image_queue->common->end=true;
+   pthread_mutex_unlock(&thread_data->image_queue->common->mutex_end);
    break;
   }
   image yolo_image=libyolo_mat_to_image(mat);
@@ -272,14 +272,17 @@ void *thread_detect(void *data)
   if(sem_trywait(th_data->image_queue->full))
   {
    bool end;
-   if(pthread_mutex_lock(&th_data->common->mutex_end) != 0)
+   if(pthread_mutex_lock(&th_data->image_queue->common->mutex_end) != 0)
    {
     continue;
    }
-   end=th_data->common->end;
-   pthread_mutex_unlock(&th_data->common->mutex_end);
+   end=th_data->image_queue->common->end;
+   pthread_mutex_unlock(&th_data->image_queue->common->mutex_end);
    if(end)
    {
+    pthread_mutex_lock(&th_data->detections_queue->common->mutex_end);
+    th_data->detections_queue->common->end=true;
+    pthread_mutex_unlock(&th_data->detections_queue->common->mutex_end);
     break;
    }
    continue;
@@ -553,16 +556,20 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  thread_image_queue_t image_queue;
  thread_detections_queue_t detections_queue;
 
- thread_common_t data_common;
+ thread_common_t data_image_common;
+ thread_common_t data_processing_common;
  thread_get_frame_t data_get_image;
  thread_processing_image_t data_process_image;
  thread_processing_detections_t data_processing_detection;
 
- data_common.end=false;
+ data_image_common.end=false;
+ data_processing_common.end=false;
  image_queue.queue=std::deque<queue_image_t>();
  detections_queue.queue=std::deque<queue_detection_t>();
 
- data_get_image.common=data_process_image.common=data_processing_detection.common=&data_common;
+ image_queue.common=&data_image_common;
+ detections_queue.common=&data_processing_common;
+
  data_get_image.image_queue=data_process_image.image_queue=&image_queue;
  data_process_image.detections_queue=data_processing_detection.detections_queue=&detections_queue;
 
@@ -586,10 +593,15 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  }
  //////////////////////////////////////////////////////////////////////////
 
- if(pthread_mutex_init(&data_common.mutex_end, nullptr))
+ if(pthread_mutex_init(&data_image_common.mutex_end, nullptr))
  {
   return yolo_video_cannot_alloc_base_structure;
  }
+ if(pthread_mutex_init(&data_processing_common.mutex_end, nullptr))
+ {
+  return yolo_video_cannot_alloc_base_structure;
+ }
+
  if(pthread_mutex_init(&image_queue.mutex, nullptr))
  {
   return yolo_video_cannot_alloc_base_structure;
@@ -660,9 +672,11 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  free(capture_image_thread);
 
  pthread_join(process_image_thread, nullptr);
+
  sem_close(image_queue.full);
  sem_close(image_queue.empty);
  pthread_mutex_destroy(&image_queue.mutex);
+ pthread_mutex_destroy(&data_image_common.mutex_end);
  image_queue.queue.clear();
 
  for(size_t i=0; i<num_process_detections_threads; ++i)
@@ -674,7 +688,7 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  sem_close(detections_queue.full);
  sem_close(detections_queue.empty);
  pthread_mutex_destroy(&detections_queue.mutex);
- pthread_mutex_destroy(&data_common.mutex_end);
+ pthread_mutex_destroy(&data_processing_common.mutex_end);
  detections_queue.queue.clear();
 
  //TEMP///////////////////////////////////////////////////////

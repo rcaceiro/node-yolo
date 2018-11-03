@@ -36,6 +36,8 @@ typedef struct
  sem_t *empty;
  pthread_mutex_t mutex;
  std::deque<queue_image_t> queue;
+
+ thread_common_t *common;
 }thread_image_queue_t;
 
 typedef struct
@@ -47,11 +49,12 @@ typedef struct
 
  yolo_object *yolo;
  float thresh;
+
+ thread_common_t *common;
 }thread_detections_queue_t;
 
 typedef struct
 {
- thread_common_t *common;
  thread_image_queue_t *image_queue;
  cv::VideoCapture *video;
 
@@ -62,7 +65,6 @@ typedef struct
 
 typedef struct
 {
- thread_common_t *common;
  thread_image_queue_t *image_queue;
  thread_detections_queue_t *detections_queue;
 
@@ -72,9 +74,7 @@ typedef struct
 
 typedef struct
 {
- thread_common_t *common;
  thread_detections_queue_t *detections_queue;
-
  yolo_detection_video **yolo_detect;
 
  unsigned long long int total_milis;
