@@ -377,7 +377,12 @@ void yolo_cleanup(yolo_object *yolo)
  {
   return;
  }
- free_network(yolo->net);
+
+ if(yolo->net != nullptr)
+ {
+  free_network(yolo->net);
+ }
+
  if(yolo->names != nullptr)
  {
   for(int i=0; i<yolo->class_number; i++)
@@ -684,7 +689,7 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
   pthread_join(process_detections_thread[i], nullptr);
  }
  free(process_detections_thread);
- yolo_cleanup(yolo);
+
  sem_close(detections_queue.full);
  sem_close(detections_queue.empty);
  pthread_mutex_destroy(&detections_queue.mutex);
