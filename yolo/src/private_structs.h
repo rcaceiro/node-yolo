@@ -60,6 +60,7 @@ typedef struct
 
  unsigned long long int total_milis;
  unsigned long int number_of_samples;
+ unsigned long int number_of_wait_push_image;
  pthread_mutex_t mutex;
 }thread_get_frame_t;
 
@@ -70,6 +71,8 @@ typedef struct
 
  unsigned long long int total_milis;
  unsigned long int number_of_samples;
+ unsigned long int number_of_wait_pop_get_image;
+ unsigned long int number_of_wait_push_detection;
 }thread_processing_image_t;
 
 typedef struct
@@ -79,6 +82,7 @@ typedef struct
 
  unsigned long long int total_milis;
  unsigned long int number_of_samples;
+ unsigned long int number_of_wait_pop_detection;
  pthread_mutex_t mutex;
 }thread_processing_detections_t;
 
