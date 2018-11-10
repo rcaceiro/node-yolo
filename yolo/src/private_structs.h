@@ -26,7 +26,6 @@ typedef struct
 
 typedef struct
 {
- pthread_mutex_t mutex_end;
  bool end;
 }thread_common_t;
 
