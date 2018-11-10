@@ -163,13 +163,17 @@ void *thread_capture(void *data)
    thread_data->image_queue->common->end=true;
    break;
   }
-
+  queue_image_t queue_image;
   if(pthread_mutex_lock(&thread_data->mutex))
   {
    continue;
   }
   unsigned long long int startTime=unixTimeMilis();
+
   (*thread_data->video)>>mat;
+  queue_image.milisecond=thread_data->video->get(CV_CAP_PROP_POS_MSEC);
+  queue_image.frame_number=(long)thread_data->video->get(CV_CAP_PROP_POS_FRAMES);
+
   pthread_mutex_unlock(&thread_data->mutex);
 
   if(mat.empty())
@@ -180,9 +184,6 @@ void *thread_capture(void *data)
   image yolo_image=libyolo_mat_to_image(mat);
   mat.release();
 
-  queue_image_t queue_image;
-  queue_image.milisecond=thread_data->video->get(CV_CAP_PROP_POS_MSEC);
-  queue_image.frame_number=(long)thread_data->video->get(CV_CAP_PROP_POS_FRAMES);
   queue_image.frame=yolo_image;
 
   unsigned long long int time=(unixTimeMilis()-startTime);
