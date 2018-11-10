@@ -189,8 +189,7 @@ void *thread_process_detections(void *data)
   {
    continue;
   }
-  parse_detections_video(thread_data->detections_queue->yolo, queue_detection.frame_detections, thread_data->yolo_detect, queue_detection.time_spent_for_classification, queue_detection.frame_number, queue_detection.milisecond, queue_detection.nboxes, thread_data->detections_queue->thresh);
-  free_detections(queue_detection.frame_detections, queue_detection.nboxes);
+
 
   unsigned long long int time=(unixTimeMilis()-startTime);
 
@@ -287,7 +286,6 @@ void *thread_capture(void *data)
 void *thread_detect(void *data)
 {
  bool first_time_wait_pop_image=true;
- bool first_time_wait_push_detections=true;
  if(data == nullptr)
  {
   return nullptr;
@@ -303,7 +301,6 @@ void *thread_detect(void *data)
   {
    if(th_data->image_queue->common->end)
    {
-    th_data->detections_queue->common->end=true;
     break;
    }
    if(first_time_wait_pop_image)
@@ -337,55 +334,26 @@ void *thread_detect(void *data)
    continue;
   }
 
-  layer l=th_data->detections_queue->yolo->net->layers[th_data->detections_queue->yolo->net->n-1];
+  layer l=th_data->yolo->net->layers[th_data->yolo->net->n-1];
   unsigned long long time;
   float nms=0.45;
 
-  image sized=resize_image(queue_image.frame, th_data->detections_queue->yolo->net->w, th_data->detections_queue->yolo->net->h);
+  image sized=resize_image(queue_image.frame, th_data->yolo->net->w, th_data->yolo->net->h);
   float *X=sized.data;
   time=unixTimeMilis();
-  network_predict(th_data->detections_queue->yolo->net, X);
+  network_predict(th_data->yolo->net, X);
 
   int nboxes=0;
-  detection *dets=get_network_boxes(th_data->detections_queue->yolo->net, queue_image.frame.w, queue_image.frame.h, th_data->detections_queue->thresh, 0, nullptr, 0, &nboxes);
+  detection *dets=get_network_boxes(th_data->yolo->net, queue_image.frame.w, queue_image.frame.h, th_data->thresh, 0, nullptr, 0, &nboxes);
   if(nms>0)
   {
    do_nms_sort(dets, l.side*l.side*l.n, l.classes, nms);
   }
 
-  queue_detection_t queue_detection;
-  queue_detection.time_spent_for_classification=unixTimeMilis()-time;
-  queue_detection.frame_number=queue_image.frame_number;
-  queue_detection.frame_detections=dets;
-  queue_detection.milisecond=queue_image.milisecond;
-  queue_detection.nboxes=nboxes;
+  parse_detections_video(th_data->yolo, dets, th_data->yolo_detect, (unixTimeMilis()-time), queue_image.frame_number, queue_image.milisecond, nboxes, th_data->thresh);
+  free_detections(dets, nboxes);
 
   th_data->total_milis+=(unixTimeMilis()-startTime);
-
-  if(sem_trywait(th_data->detections_queue->empty))
-  {
-   if(first_time_wait_push_detections)
-   {
-    th_data->number_of_wait_push_detection++;
-    first_time_wait_push_detections=false;
-   }
-  }
-
-  if(!first_time_wait_push_detections)
-  {
-   sem_wait(th_data->detections_queue->empty);
-  }
-
-  if(pthread_mutex_lock(&th_data->detections_queue->mutex))
-  {
-   sem_post(th_data->detections_queue->empty);
-   continue;
-  }
-  th_data->detections_queue->queue.push_back(queue_detection);
-  pthread_mutex_unlock(&th_data->detections_queue->mutex);
-  sem_post(th_data->detections_queue->full);
-
-  first_time_wait_push_detections=true;
 
   free_image(queue_image.frame);
   free_image(sized);
@@ -604,28 +572,28 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  cv::VideoCapture *capture;
 
  thread_image_queue_t image_queue;
- thread_detections_queue_t detections_queue;
+ // thread_detections_queue_t detections_queue;
 
  thread_common_t data_image_common;
  thread_common_t data_processing_common;
  thread_get_frame_t data_get_image;
  thread_processing_image_t data_process_image;
- thread_processing_detections_t data_processing_detection;
+ // thread_processing_detections_t data_processing_detection;
 
  data_image_common.end=false;
  data_processing_common.end=false;
  image_queue.queue=std::deque<queue_image_t>();
- detections_queue.queue=std::deque<queue_detection_t>();
+ // detections_queue.queue=std::deque<queue_detection_t>();
 
  image_queue.common=&data_image_common;
- detections_queue.common=&data_processing_common;
+ // detections_queue.common=&data_processing_common;
 
  data_get_image.image_queue=data_process_image.image_queue=&image_queue;
- data_process_image.detections_queue=data_processing_detection.detections_queue=&detections_queue;
+ // data_process_image.detections_queue=data_processing_detection.detections_queue=&detections_queue;
 
- data_process_image.detections_queue->yolo=yolo;
- data_process_image.detections_queue->thresh=thresh;
- data_processing_detection.yolo_detect=detect;
+ data_process_image.yolo=yolo;
+ data_process_image.thresh=thresh;
+ data_process_image.yolo_detect=detect;
 
  //TEMP////////////////////////////////////////////////////////////////
  data_get_image.total_milis=0;
@@ -636,13 +604,13 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
   return yolo_video_cannot_alloc_base_structure;
  }
 
- data_processing_detection.total_milis=0;
- data_processing_detection.number_of_samples=0;
- data_processing_detection.number_of_wait_pop_detection=0;
- if(pthread_mutex_init(&data_processing_detection.mutex, nullptr))
- {
-  return yolo_video_cannot_alloc_base_structure;
- }
+ // data_processing_detection.total_milis=0;
+ // data_processing_detection.number_of_samples=0;
+ // data_processing_detection.number_of_wait_pop_detection=0;
+ // if(pthread_mutex_init(&data_processing_detection.mutex, nullptr))
+ // {
+ //  return yolo_video_cannot_alloc_base_structure;
+ // }
 
  data_process_image.number_of_wait_push_detection=0;
  data_process_image.number_of_wait_pop_get_image=0;
@@ -651,10 +619,10 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  {
   return yolo_video_cannot_alloc_base_structure;
  }
- if(pthread_mutex_init(&detections_queue.mutex, nullptr))
- {
-  return yolo_video_cannot_alloc_base_structure;
- }
+ // if(pthread_mutex_init(&detections_queue.mutex, nullptr))
+ // {
+ //  return yolo_video_cannot_alloc_base_structure;
+ // }
 
  image_queue.empty=sem_open("/image_empty", O_CREAT, 0644, 10);
  if(image_queue.empty == SEM_FAILED)
@@ -667,16 +635,16 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
   return yolo_video_cannot_alloc_base_structure;
  }
 
- detections_queue.empty=sem_open("/detections_empty", O_CREAT, 0644, 10);
- if(image_queue.empty == SEM_FAILED)
- {
-  return yolo_video_cannot_alloc_base_structure;
- }
- detections_queue.full=sem_open("/detections_full", O_CREAT, 0644, 0);
- if(image_queue.full == SEM_FAILED)
- {
-  return yolo_video_cannot_alloc_base_structure;
- }
+ // detections_queue.empty=sem_open("/detections_empty", O_CREAT, 0644, 10);
+ // if(image_queue.empty == SEM_FAILED)
+ // {
+ //  return yolo_video_cannot_alloc_base_structure;
+ // }
+ // detections_queue.full=sem_open("/detections_full", O_CREAT, 0644, 0);
+ // if(image_queue.full == SEM_FAILED)
+ // {
+ //  return yolo_video_cannot_alloc_base_structure;
+ // }
 
  capture=new cv::VideoCapture(filename);
  if(!capture->isOpened())
@@ -701,10 +669,10 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
   pthread_create(capture_image_thread+i, nullptr, thread_capture, &data_get_image);
  }
 
- for(size_t i=0; i<num_capture_image_threads; ++i)
- {
-  pthread_create(process_detections_thread+i, nullptr, thread_process_detections, &data_processing_detection);
- }
+ // for(size_t i=0; i<num_capture_image_threads; ++i)
+ // {
+ //  pthread_create(process_detections_thread+i, nullptr, thread_process_detections, &data_processing_detection);
+ // }
 
  pthread_create(&process_image_thread, nullptr, thread_detect, &data_process_image);
 
@@ -729,20 +697,20 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  }
  free(process_detections_thread);
 
- sem_close(detections_queue.full);
- sem_close(detections_queue.empty);
- pthread_mutex_destroy(&detections_queue.mutex);
- detections_queue.queue.clear();
+ // sem_close(detections_queue.full);
+ // sem_close(detections_queue.empty);
+ // pthread_mutex_destroy(&detections_queue.mutex);
+ // detections_queue.queue.clear();
 
  //TEMP///////////////////////////////////////////////////////
  pthread_mutex_destroy(&data_get_image.mutex);
- pthread_mutex_destroy(&data_processing_detection.mutex);
+ // pthread_mutex_destroy(&data_processing_detection.mutex);
  ///////////////////////////////////////////////////////////
 
  printf("Process video took %llu\n", unixTimeMilis()-start);
  printf("Process get frames took around %lf and the number of waits to push the image object was %lu\n", data_get_image.total_milis/(1.0f*data_get_image.number_of_samples), data_get_image.number_of_wait_push_image);
  printf("Process %lu images took around %lf, the number of waits to pop the image object was %lu and the number of waits to push the image detections was %lu\n", data_get_image.number_of_samples, data_process_image.total_milis/(1.0f*data_process_image.number_of_samples), data_process_image.number_of_wait_pop_get_image, data_process_image.number_of_wait_push_detection);
- printf("Process process detections took around %lf and the number of waits to pop the image detections was %lu\n", data_processing_detection.total_milis/(1.0f*data_processing_detection.number_of_samples), data_processing_detection.number_of_wait_pop_detection);
+ // printf("Process process detections took around %lf and the number of waits to pop the image detections was %lu\n", data_processing_detection.total_milis/(1.0f*data_processing_detection.number_of_samples), data_processing_detection.number_of_wait_pop_detection);
  return yolo_ok;
 }
 

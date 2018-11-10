@@ -15,14 +15,14 @@ typedef struct
  image frame;
 }queue_image_t;
 
-typedef struct
-{
- long frame_number;
- double milisecond;
- float time_spent_for_classification;
- detection *frame_detections;
- int nboxes;
-}queue_detection_t;
+//typedef struct
+//{
+// long frame_number;
+// double milisecond;
+// float time_spent_for_classification;
+// detection *frame_detections;
+// int nboxes;
+//}queue_detection_t;
 
 typedef struct
 {
@@ -39,18 +39,18 @@ typedef struct
  thread_common_t *common;
 }thread_image_queue_t;
 
-typedef struct
-{
- sem_t *full;
- sem_t *empty;
- pthread_mutex_t mutex;
- std::deque<queue_detection_t> queue;
-
- yolo_object *yolo;
- float thresh;
-
- thread_common_t *common;
-}thread_detections_queue_t;
+//typedef struct
+//{
+// sem_t *full;
+// sem_t *empty;
+// pthread_mutex_t mutex;
+// std::deque<queue_detection_t> queue;
+//
+// yolo_object *yolo;
+// float thresh;
+//
+// thread_common_t *common;
+//}thread_detections_queue_t;
 
 typedef struct
 {
@@ -66,7 +66,11 @@ typedef struct
 typedef struct
 {
  thread_image_queue_t *image_queue;
- thread_detections_queue_t *detections_queue;
+ // thread_detections_queue_t *detections_queue;
+
+ yolo_object *yolo;
+ float thresh;
+ yolo_detection_video **yolo_detect;
 
  unsigned long long int total_milis;
  unsigned long int number_of_samples;
@@ -74,15 +78,15 @@ typedef struct
  unsigned long int number_of_wait_push_detection;
 }thread_processing_image_t;
 
-typedef struct
-{
- thread_detections_queue_t *detections_queue;
- yolo_detection_video **yolo_detect;
-
- unsigned long long int total_milis;
- unsigned long int number_of_samples;
- unsigned long int number_of_wait_pop_detection;
- pthread_mutex_t mutex;
-}thread_processing_detections_t;
+//typedef struct
+//{
+// thread_detections_queue_t *detections_queue;
+// yolo_detection_video **yolo_detect;
+//
+// unsigned long long int total_milis;
+// unsigned long int number_of_samples;
+// unsigned long int number_of_wait_pop_detection;
+// pthread_mutex_t mutex;
+//}thread_processing_detections_t;
 
 #endif //NODE_YOLO_PRIVATE_STRUCTS_H
