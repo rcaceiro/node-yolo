@@ -145,66 +145,66 @@ unsigned long long unixTimeMilis()
  return (unsigned long long)(tv.tv_sec)*1000+(unsigned long long)(tv.tv_usec)/1000;
 }
 
-void *thread_process_detections(void *data)
-{
- if(data == nullptr)
- {
-  return nullptr;
- }
- auto *thread_data=(thread_processing_detections_t *)data;
- bool first_time_wait_pop_detections=true;
-
- while(true)
- {
-  if(sem_trywait(thread_data->detections_queue->full))
-  {
-   if(thread_data->detections_queue->common->end)
-   {
-    break;
-   }
-   if(first_time_wait_pop_detections)
-   {
-    first_time_wait_pop_detections=false;
-   }
-   continue;
-  }
-
-  queue_detection_t queue_detection;
-  bool im_got_sucessfull;
-  if(pthread_mutex_lock(&thread_data->detections_queue->mutex))
-  {
-   continue;
-  }
-  im_got_sucessfull=!thread_data->detections_queue->queue.empty();
-  if(im_got_sucessfull)
-  {
-   queue_detection=thread_data->detections_queue->queue.front();
-   thread_data->detections_queue->queue.pop_front();
-  }
-  pthread_mutex_unlock(&thread_data->detections_queue->mutex);
-  sem_post(thread_data->detections_queue->empty);
-
-  unsigned long long int startTime=unixTimeMilis();
-  if(!im_got_sucessfull)
-  {
-   continue;
-  }
-
-
-  unsigned long long int time=(unixTimeMilis()-startTime);
-
-  pthread_mutex_lock(&thread_data->mutex);
-  thread_data->number_of_samples++;
-  thread_data->total_milis+=time;
-  if(!first_time_wait_pop_detections)
-  {
-   thread_data->number_of_wait_pop_detection++;
-   first_time_wait_pop_detections=true;
-  }
-  pthread_mutex_unlock(&thread_data->mutex);
- }
- return nullptr;
-}
+//void *thread_process_detections(void *data)
+//{
+// if(data == nullptr)
+// {
+//  return nullptr;
+// }
+// auto *thread_data=(thread_processing_detections_t *)data;
+// bool first_time_wait_pop_detections=true;
+//
+// while(true)
+// {
+//  if(sem_trywait(thread_data->detections_queue->full))
+//  {
+//   if(thread_data->detections_queue->common->end)
+//   {
+//    break;
+//   }
+//   if(first_time_wait_pop_detections)
+//   {
+//    first_time_wait_pop_detections=false;
+//   }
+//   continue;
+//  }
+//
+//  queue_detection_t queue_detection;
+//  bool im_got_sucessfull;
+//  if(pthread_mutex_lock(&thread_data->detections_queue->mutex))
+//  {
+//   continue;
+//  }
+//  im_got_sucessfull=!thread_data->detections_queue->queue.empty();
+//  if(im_got_sucessfull)
+//  {
+//   queue_detection=thread_data->detections_queue->queue.front();
+//   thread_data->detections_queue->queue.pop_front();
+//  }
+//  pthread_mutex_unlock(&thread_data->detections_queue->mutex);
+//  sem_post(thread_data->detections_queue->empty);
+//
+//  unsigned long long int startTime=unixTimeMilis();
+//  if(!im_got_sucessfull)
+//  {
+//   continue;
+//  }
+//
+//
+//  unsigned long long int time=(unixTimeMilis()-startTime);
+//
+//  pthread_mutex_lock(&thread_data->mutex);
+//  thread_data->number_of_samples++;
+//  thread_data->total_milis+=time;
+//  if(!first_time_wait_pop_detections)
+//  {
+//   thread_data->number_of_wait_pop_detection++;
+//   first_time_wait_pop_detections=true;
+//  }
+//  pthread_mutex_unlock(&thread_data->mutex);
+// }
+// return nullptr;
+//}
 
 void *thread_capture(void *data)
 {
