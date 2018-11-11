@@ -503,7 +503,7 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  {
   return status;
  }
- const size_t num_capture_image_threads=1;
+ const size_t num_capture_image_threads=2;
  pthread_t *capture_image_thread;
  pthread_t process_image_thread;
  cv::VideoCapture *capture;
