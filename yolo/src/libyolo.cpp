@@ -541,7 +541,7 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
   return yolo_video_cannot_alloc_base_structure;
  }
 
- image_queue.empty=sem_open("/image_empty", O_CREAT, 0644, 10);
+ image_queue.empty=sem_open("/image_empty", O_CREAT, 0644, 20);
  if(image_queue.empty == SEM_FAILED)
  {
   return yolo_video_cannot_alloc_base_structure;
