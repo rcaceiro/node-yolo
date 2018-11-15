@@ -168,12 +168,12 @@ yolo_napi_status load_detection_object(napi_env env, yolo_detection_image *img_d
  napi_value js_time_spent_for_classification;
  yolo_napi_status yolo_stats;
 
- if(napi_create_double(env,img_detections->time_spent_for_classification,&js_time_spent_for_classification)!=napi_ok)
+ if(napi_create_double(env, img_detections->time_spent_for_classification, &js_time_spent_for_classification) != napi_ok)
  {
   return yolo_napi_create_object_time_spent_for_classification_double_failed;
  }
 
- if(napi_set_named_property(env,object,"timeSpentForClassification",js_time_spent_for_classification)!=napi_ok)
+ if(napi_set_named_property(env, object, "timeSpentForClassification", js_time_spent_for_classification) != napi_ok)
  {
   return yolo_napi_create_object_time_spent_for_classification_named_property_failed;
  }
@@ -190,7 +190,7 @@ yolo_napi_status load_detection_object(napi_env env, yolo_detection_image *img_d
   return yolo_stats;
  }
 
- if(napi_set_named_property(env,object,"detections",js_detections_array)!=napi_ok)
+ if(napi_set_named_property(env, object, "detections", js_detections_array) != napi_ok)
  {
   return yolo_napi_create_object_time_spent_for_classification_named_property_failed;
  }
@@ -208,32 +208,32 @@ yolo_napi_status load_video_detection_object(napi_env env, yolo_detection_video 
   napi_value frame_id;
   napi_value milisecond;
 
-  if(napi_create_object(env,&object)!=napi_ok)
+  if(napi_create_object(env, &object) != napi_ok)
   {
    return yolo_napi_create_main_object_failed;
   }
 
-  if(napi_create_int64(env,video_detections->frame_detections[i].frame,&frame_id)!=napi_ok)
+  if(napi_create_int64(env, video_detections->frame_detections[i].frame, &frame_id) != napi_ok)
   {
    return yolo_napi_create_frame_failed;
   }
 
-  if(napi_create_double(env,video_detections->frame_detections[i].milisecond,&milisecond)!=napi_ok)
+  if(napi_create_double(env, video_detections->frame_detections[i].milisecond, &milisecond) != napi_ok)
   {
    return yolo_napi_create_second_failed;
   }
 
-  if(napi_set_named_property(env,object,"frame_number",frame_id)!=napi_ok)
+  if(napi_set_named_property(env, object, "frame_number", frame_id) != napi_ok)
   {
    return yolo_napi_set_frame_to_object_failed;
   }
 
-  if(napi_set_named_property(env,object,"milisecond",milisecond)!=napi_ok)
+  if(napi_set_named_property(env, object, "milisecond", milisecond) != napi_ok)
   {
    return yolo_napi_set_second_to_object_failed;
   }
 
-  yolo_stats=load_detection_object(env,&video_detections->frame_detections[i].detection_frame,object);
+  yolo_stats=load_detection_object(env, &video_detections->frame_detections[i].detection_frame, object);
   if(yolo_stats != yolo_napi_ok)
   {
    return yolo_napi_create_main_object_failed;
@@ -284,13 +284,13 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
   reject(env, yolo_napi_error_from_libyolo, holder);
  }
 
- if(status!=napi_ok)
+ if(status != napi_ok)
  {
   reject(env, yolo_napi_unknow_error, holder);
   return;
  }
 
- if(holder->img_detection==nullptr&&holder->video_detection==nullptr)
+ if(holder->img_detection == nullptr && holder->video_detection == nullptr)
  {
   reject(env, yolo_napi_unknow_error, holder);
   return;
@@ -298,13 +298,13 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
 
  if(holder->img_detection != nullptr)
  {
-  if(napi_create_object(env,&return_value)!=napi_ok)
+  if(napi_create_object(env, &return_value) != napi_ok)
   {
-   reject(env,yolo_napi_create_main_object_failed,holder);
+   reject(env, yolo_napi_create_main_object_failed, holder);
   }
   else
   {
-   yolo_stats=load_detection_object(env,holder->img_detection,return_value);
+   yolo_stats=load_detection_object(env, holder->img_detection, return_value);
 
    if(yolo_stats == yolo_napi_ok)
    {
@@ -312,20 +312,20 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
    }
    else
    {
-    reject(env,yolo_stats,holder);
+    reject(env, yolo_stats, holder);
    }
   }
   yolo_detection_image_free(&holder->img_detection);
  }
  else
  {
-  if(napi_create_array_with_length(env,holder->video_detection->count,&return_value)!=napi_ok)
+  if(napi_create_array_with_length(env, holder->video_detection->count, &return_value) != napi_ok)
   {
-   reject(env,yolo_napi_create_main_object_failed,holder);
+   reject(env, yolo_napi_create_main_object_failed, holder);
   }
   else
   {
-   yolo_stats=load_video_detection_object(env,holder->video_detection,return_value);
+   yolo_stats=load_video_detection_object(env, holder->video_detection, return_value);
 
    if(yolo_stats == yolo_napi_ok)
    {
@@ -333,7 +333,7 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
    }
    else
    {
-    reject(env,yolo_stats,holder);
+    reject(env, yolo_stats, holder);
    }
   }
   yolo_detection_video_free(&holder->video_detection);
