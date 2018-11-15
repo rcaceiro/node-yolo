@@ -4,7 +4,10 @@
 - **y** represent, new backwards compatible functionality are introduced
 - **x** represent, any backwards incompatible changes are introduced, and/or a big bundle of bug fixes and new functionalities are introduced. 
 
-## [v2.0.0](https://github.com/rcaceiro/node-yolo/tree/v2.0.0) (2018)
+## [v2.1.0](https://github.com/rcaceiro/node-yolo/tree/v2.0.0) (2018)
+[Full Changelog](https://github.com/rcaceiro/node-yolo/compare/v2.0.0...v2.1.0)
+
+## [v2.0.0](https://github.com/rcaceiro/node-yolo/tree/v2.0.0) (15-11-2018)
 [Full Changelog](https://github.com/rcaceiro/node-yolo/compare/previous_to_v2.0.0...v2.0.0)
 
 **New Features**:
