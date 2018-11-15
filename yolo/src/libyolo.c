@@ -1,5 +1,4 @@
 #include "libyolo.h"
-#include "map_lib.h"
 #include <limits.h>
 
 void yolo_cleanup(yolo_object *yolo)
@@ -124,11 +123,14 @@ yolo_status yolo_init(yolo_object **yolo_obj, char *workingDir, char *datacfg, c
 
 yolo_status parse_detections(yolo_object *yolo, detection *dets, yolo_detection **yolo_detect, int nboxes, int classes, float thresh)
 {
- struct map_t *map=map_create();
- if(map == NULL)
+ (*yolo_detect)=calloc(1, sizeof(yolo_detection));
+ if((*yolo_detect) == NULL)
  {
-  return yolo_cannot_alloc_map;
+  return yolo_cannot_alloc_yolo_detection;
  }
+ memset((*yolo_detect), 0, sizeof(yolo_detection));
+ yolo_detection *yolo_dets=(*yolo_detect);
+
  int class_index;
  detection *det;
 
@@ -149,57 +151,36 @@ yolo_status parse_detections(yolo_object *yolo, detection *dets, yolo_detection 
   }
   if(class_index>-1 && det != NULL)
   {
-   map_set(map, class_index, det);
+   void *temp_pointer=realloc(yolo_dets->detection, sizeof(detect)*(yolo_dets->num_boxes+1));
+   if(temp_pointer == NULL)
+   {
+    return yolo_cannot_alloc_detect;
+   }
+   yolo_dets->detection=(detect *)temp_pointer;
+
+   size_t strlength=strlen(yolo->names[class_index]);
+   yolo->names[class_index][strlength]='\0';
+   yolo_dets->detection[yolo_dets->num_boxes].class_name=calloc(strlength+1, sizeof(char));
+   strcpy(yolo_dets->detection[yolo_dets->num_boxes].class_name, yolo->names[class_index]);
+   yolo_dets->detection[yolo_dets->num_boxes].probability=det->prob[class_index]*100;
+   box *bbox;
+   yolo_dets->detection[yolo_dets->num_boxes].bbox=det->bbox;
+   bbox=&yolo_dets->detection[yolo_dets->num_boxes].bbox;
+   ++yolo_dets->num_boxes;
+
+   bbox->x=bbox->x-(bbox->w/2);
+   bbox->y=bbox->y-(bbox->h/2);
+
+   if(bbox->x<0)
+   {
+    bbox->x=0;
+   }
+   if(bbox->y<0)
+   {
+    bbox->y=0;
+   }
   }
  }
-
- (*yolo_detect)=calloc(1, sizeof(yolo_detection));
- if((*yolo_detect) == NULL)
- {
-  return yolo_cannot_alloc_yolo_detection;
- }
- memset((*yolo_detect), 0, sizeof(yolo_detection));
- yolo_detection *yolo_dets=(*yolo_detect);
-
- if(map_empty(map))
- {
-  map_free(map);
-  return yolo_ok;
- }
- yolo_dets->num_boxes=map_size(map);
-
- yolo_dets->detection=calloc((size_t)yolo_dets->num_boxes, sizeof(detect));
- if(yolo_dets->detection == NULL)
- {
-  return yolo_cannot_alloc_detect;
- }
-
- int i=0;
- size_t strlength;
- for(struct map_t *m=map; m != NULL; m=m->nxt)
- {
-  strlength=strlen(yolo->names[m->key]);
-  yolo->names[m->key][strlength]='\0';
-  yolo_dets->detection[i].class_name=calloc(strlength+1, sizeof(char));
-  strcpy(yolo_dets->detection[i].class_name, yolo->names[m->key]);
-  yolo_dets->detection[i].probability=m->value->prob[m->key]*100;
-  box *bbox;
-  yolo_dets->detection[i].bbox=m->value->bbox;
-  bbox=&yolo_dets->detection[i].bbox;
-  bbox->x=bbox->x-(bbox->w/2);
-  bbox->y=bbox->y-(bbox->h/2);
-
-  if(bbox->x<0)
-  {
-   bbox->x=0;
-  }
-  if(bbox->y<0)
-  {
-   bbox->y=0;
-  }
-  i++;
- }
- map_free(map);
  return yolo_ok;
 }
 
