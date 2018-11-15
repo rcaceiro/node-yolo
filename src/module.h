@@ -1,5 +1,5 @@
-#ifndef NODEYOLOJS_MODULE_H
-#define NODEYOLOJS_MODULE_H
+#ifndef NODE_YOLO_MODULE_H
+#define NODE_YOLO_MODULE_H
 
 #include <node_api.h>
 #include <libyolo.h>
@@ -21,7 +21,8 @@ private:
 
  static napi_value New(napi_env env, napi_callback_info info);
 
- static napi_value Detect(napi_env env, napi_callback_info info);
+ static napi_value DetectImage(napi_env env, napi_callback_info info);
+ static napi_value DetectVideo(napi_env env, napi_callback_info info);
 
  static napi_ref constructor;
 
@@ -34,10 +35,12 @@ typedef struct
 {
  Yolo *yolo;
  char *image_path;
+ float thresh_value;
  napi_deferred deferred;
  napi_async_work work;
  napi_value resource;
- yolo_detection *img_detection;
+ yolo_detection_image *img_detection;
+ yolo_detection_video *video_detection;
  yolo_status yolo_stats;
 }data_holder;
 

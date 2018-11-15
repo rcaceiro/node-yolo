@@ -1,5 +1,6 @@
-.idea
+.idea/
 CMakeLists.txt
+weights/
 *.weights
 *.a
 *.dylib
@@ -8,6 +9,6 @@ darknet/cfg
 darknet/data
 darknet/examples
 darknet/python
-vapi-node-yolo-1.0.3.tgz
 cmake-build-debug/
 node_modules/
+data/

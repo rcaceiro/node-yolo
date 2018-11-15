@@ -1,24 +1,32 @@
 {
  "variables":{
-  "with_opencv%":"<!(node ./util/has_lib.js opencv)",
+  "with_openmp%":"<!(node ./util/has_lib.js openmp)",
   "with_cuda%":"<!(node ./util/has_lib.js cuda)"
  },
  "targets":[
   {
-   "target_name":"nodeyolojs",
+   "target_name":"nodeyolo",
    "sources":[
-    "src/module.cpp"
+    "src/module.cpp",
+    "src/napi_yolo_errors.c"
    ],
    "libraries":[
-    "<(module_root_dir)/yolo/libyolo.a"
+    "<(module_root_dir)/yolo/libyolo.a",
+    "-lopencv_core",
+    "-lopencv_highgui",
+    "-lopencv_videoio",
+    "-lopencv_video"
    ],
    "defines":[
+    "OPENCV",
     "NAPI_DISABLE_CPP_EXCEPTIONS"
    ],
    "include_dirs":[
     "<(module_root_dir)/yolo/src",
     "<(module_root_dir)/darknet/src",
-    "<(module_root_dir)/darknet/include"
+    "<(module_root_dir)/darknet/include",
+    "<(module_root_dir)/stack/",
+    "<(module_root_dir)/common/include"
    ],
    "cflags":[
     "-Wall",
@@ -37,6 +45,17 @@
     }
    },
    "conditions":[
+   [
+   	'with_openmp=="true"',
+   	{
+   	 "cflags":[
+   	  "-fopenmp"
+   	 ],
+   	 "libraries":[
+   	  "-lomp",
+   	 ]
+   	}
+    ],
     [
 	'with_cuda=="true"',
 	{
@@ -45,7 +64,7 @@
 	 ],
 	 "libraries":[
 	  "-L/usr/local/cuda/lib64",
-	  "-L/usr/lib/x86_64-linux-gnu/"
+	  "-L/usr/lib/x86_64-linux-gnu/",
 	  "-lcuda",
 	  "-lcudart",
 	  "-lcublas",

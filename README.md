@@ -1,22 +1,28 @@
-
 # node-yolo
 This Node.js C++ Addon came out from a computer engineering project, [VAPi](https://github.com/freakstatic/vapi-server).
 It allow you to use a state-of-the-art, real-time object detection system called [Yolo](https://pjreddie.com/darknet/yolo/).
 
-**Note**: Now is in progress some work to improve the module, to enhance the current functionalities:
-- First we begin to improve more robustness to the lib
-- Second give the possibility to process videos files and later on video streams
-- Split the libyolo and node-yolo projects, for those that like an easy lib to continue on C or C++ instead node.js.
-
-**Who fork and/or use this repo please stay sharp because alot of changes happening and not backwards compatibility between 1.*.* version and 2.*.* version.**
-
+**Now this branch is in development mode. Now is in beta, the video classification functionality works but need alot of refinements.
+  If you use this branch please be careful you have some instabilities and check for frequent updates.**
 ### Pre-requirements
-* C/C++ Compiler
-* Nvidia graphic card with [CUDA](https://developer.nvidia.com/cuda-downloads) support and required files installed (Only if you want to use GPU acceleration)
-* [Node.js](https://nodejs.org/en/) >= 9
+* C/C++ Compiler (tested with gcc & g++)
+* nVidia graphic card (Only if you want to use GPU acceleration):
+	* [CUDA](https://developer.nvidia.com/cuda-zone)
+	* [CuDNN](https://developer.nvidia.com/cudnn)
+* [Node.js](https://nodejs.org/en/) (tested on node.js>= 8)
 * [node-gyp](https://www.npmjs.com/package/node-gyp)
-* [ImageMagick](https://www.imagemagick.org/)
+* [OpenCV](https://opencv.org)
 
+**Note 1**: Before any update please see the [changelog](https://github.com/rcaceiro/node-yolo/blob/master/CHANGELOG.md).<br>
+**Note 2**: The versions prior 2.0.0 of the module has the [ImageMagick](https://www.imagemagick.org) as a dependency, but with OpenCV we can archive the desired goal. And by this we remove one dependency of the project.
+### Recommended* hardware requirements
+* Quad-core processor**
+* 10 GB to run node-yolo
+* At least 4GB of GPU memory***, if you want use GPU acceleration
+### Minimum* hardware requirements
+* Dual-core processor**
+* 8 GB to run node-yolo
+* At least 4GB of GPU memory***, if you want use GPU acceleration
 ## Installation
 ```sh
 npm i @vapi/node-yolo --save
@@ -25,16 +31,24 @@ npm i @vapi/node-yolo --save
 ## How To Use
 
 ```javascript
-const yolo = require('@vapi/node-yolo');
-const detector = new yolo("darknet-configs", "cfg/coco.data", "cfg/yolov3.cfg", "yolov3.weights");
+const Yolo = require('@vapi/node-yolo');
+const detector = new Yolo("darknet-configs", "cfg/coco.data", "cfg/yolov3.cfg", "yolov3.weights");
 try{
-	detector.detect(path)
+	detector.detectImage(path)
          .then(detections => {
             // here you receive the detections
          })
          .catch(error => {
            // here you can handle the errors. Ex: Out of memory
         });
+	
+	detector.detectVideo(path)
+              .then(detections => {
+                 // here you receive the detections
+              })
+              .catch(error => {
+                // here you can handle the errors. Ex: Out of memory
+             });
 }
 catch(error){
     console.log('Catch: ' + error);
@@ -53,20 +67,37 @@ You need to create two folder, cfg and data and put the files for each one. Like
     │   └── yolov3.weights      # YoloV3 weights file
     └── ...
 
+**Note**: Our suggestion for better performance is to use [coco.data](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.data), [coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.names), [yolov3-spp.cfg](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3-spp.cfg) and [yolov3-spp.weights](https://pjreddie.com/media/files/yolov3-spp.weights).
 
+#### video detection object
+| **Field** | **Type** | **Description**
+|:----------|:---------|:-----------------------------------------------------
+| `frame` | `long/int64` | number of the frame
+| `milisecond` | `double` | the second that frame appear on video
+| `timeSpentForClassification` | `double` | time used to classifies one frame
+| `detections` | `array` | array of `detections` object, containing all detections 
 
+#### image detection object
+| **Field** | **Type** | **Description**
+|:----------|:---------|:-----------------------------------------------------
+| `timeSpentForClassification` | `double` | time used to classifies one image
+| `detections` | `array` | array of `detections` object, containing all detections 
 
 #### detections object
-| **Field**   | **Description**
-|:--------------|:---------------------------------------------------------------
-| `className`   | name of the class of the object detected
-| `probability` | the higher probability that this className is correct
-| `box`         | object that contains box info of the object
+| **Field** | **Type** | **Description**
+|:----------|:---------|:-----------------------------------------------------
+| `className`   | `string` | name of the class of the object detected
+| `probability` | `double` | the higher probability that this className is correct
+| `box`         | `box` | object that contains box info of the object
 
 #### box object
-| **Field**   | **Description**
-|:--------------|:---------------------------------------------------------------
-| `x`           | x coordinate in pixels of the picture
-| `y`           | y coordinate in pixels of the picture
-| `w`           | width from x point in pixels
-| `h`           | height from y point in pixels
+| **Field** | **Type** | **Description**
+|:----------|:---------|:-----------------------------------------------------
+| `x`       | `double` | x coordinate in pixels of the picture
+| `y`       | `double` | y coordinate in pixels of the picture
+| `w`       | `double` | width from x point in pixels
+| `h`       | `double` | height from y point in pixels
+
+\* To get that metrics we calculate the usage for video with 3 hours at 60fps.
+<br>\**If you do not use gpu, may should consider a processor with higher number of cores.
+<br>\***The weaker graphics card used was a nVidia GTX960M

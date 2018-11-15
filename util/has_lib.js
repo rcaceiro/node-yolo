@@ -96,6 +96,8 @@ function hasCuda() {
 
 function main(query) {
     switch (query) {
+        case 'openmp':
+            return hasSystemLib("omp")
         case 'opencv':
             return hasSystemLib(query)
         case 'cuda':

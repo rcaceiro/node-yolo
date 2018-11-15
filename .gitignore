@@ -36,15 +36,19 @@ cmake-build-debug/
 
 # Clion
 .idea/
+.gitconfig
 
 #libyolo build folder
 obj/
 *.weights
+weights/
+data/
 
 #NodeJS
 build/
 node_modules/
 package-lock.json
 vapi-node-yolo*.tgz
+
 #macOS
 .DS_Store
