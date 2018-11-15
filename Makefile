@@ -2,7 +2,7 @@ GPU=0
 CUDNN=0
 OPENCV=1
 OPENMP=0
-DEBUG=1
+DEBUG=0
 
 NVCC_RESULT := $(shell which nvcc 2> /dev/null)
 NVCC_TEST := $(notdir $(NVCC_RESULT))
