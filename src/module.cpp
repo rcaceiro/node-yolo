@@ -616,7 +616,7 @@ napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
  }
 
  int percentage_frames_to_drop=0;
- if(argc == 2)
+ if(argc>2)
  {
   status=get_int_value(env, args, 2, &percentage_frames_to_drop);
   if(status != napi_ok)
