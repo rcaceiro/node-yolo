@@ -52,6 +52,26 @@ napi_status get_double_value(napi_env env, napi_value args[], size_t index, doub
  return napi_ok;
 }
 
+napi_status get_int_value(napi_env env, napi_value args[], size_t index, int *value)
+{
+ napi_status status;
+ napi_valuetype value_type;
+ status=napi_typeof(env, args[index], &value_type);
+ if(status != napi_ok)
+ {
+  return napi_invalid_arg;
+ }
+
+ if(value_type != napi_number)
+ {
+  return napi_number_expected;
+ }
+
+ status=napi_get_value_int32(env, args[index], value);
+ assert(status == napi_ok);
+ return napi_ok;
+}
+
 yolo_napi_status load_box_object(napi_env env, box img_box, napi_value jsbox)
 {
  napi_status status;
@@ -370,7 +390,7 @@ void async_detect_video(napi_env env, void *data)
  if(holder->yolo->created)
  {
   holder->yolo->mutex_lock();
-  holder->yolo_stats=yolo_detect_video(holder->yolo->yolo, &holder->video_detection, holder->image_path, holder->thresh_value);
+  holder->yolo_stats=yolo_detect_video(holder->yolo->yolo, &holder->video_detection, holder->image_path, holder->thresh_value, holder->framesToDropFramess);
   holder->yolo->mutex_unlock();
  }
  else
@@ -563,8 +583,8 @@ napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
  napi_deferred deferred;
  napi_value promise;
  napi_value jsthis;
- size_t argc=2;
- napi_value args[2];
+ size_t argc=3;
+ napi_value args[3];
 
  status=napi_get_cb_info(env, info, &argc, args, &jsthis, nullptr);
  if(status != napi_ok)
@@ -595,6 +615,17 @@ napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
   return nullptr;
  }
 
+ int percentageToDropFrames=0;
+ if(argc == 2)
+ {
+  status=get_int_value(env, args, 2, &percentageToDropFrames);
+  if(status != napi_ok)
+  {
+   napi_throw_error(env, "05", "Cannot get percentage to drop frames value");
+   return nullptr;
+  }
+ }
+
  void *obj=nullptr;
  status=napi_unwrap(env, jsthis, &obj);
  assert(status == napi_ok);
@@ -622,6 +653,7 @@ napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
  holder->thresh_value=(float)thresh;
  holder->yolo=yolo_obj;
  holder->resource=resource;
+ holder->framesToDropFrames=percentageToDropFrames;
 
  status=napi_create_async_work(env, resource, resource_name, async_detect_video, complete_async_detect, holder, &holder->work);
  assert(status == napi_ok);
