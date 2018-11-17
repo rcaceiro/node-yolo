@@ -35,7 +35,7 @@ typedef struct
  thread_image_queue_t *image_queue;
  cv::VideoCapture *video;
 
- unsigned int numberFramesToDrop;
+ unsigned int percentage_frames_to_drop;
  unsigned long long int total_milis;
  unsigned long int number_of_samples;
  unsigned long int number_of_wait_push_image;

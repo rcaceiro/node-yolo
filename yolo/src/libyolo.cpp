@@ -519,9 +519,9 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
 
  data_get_image.image_queue=data_process_image.image_queue=&image_queue;
 
- data_get_image.
+ data_get_image.percentage_frames_to_drop=percentage_frames_to_drop;
 
-      data_process_image.yolo=yolo;
+ data_process_image.yolo=yolo;
  data_process_image.thresh=thresh;
  data_process_image.yolo_detect=detect;
 
