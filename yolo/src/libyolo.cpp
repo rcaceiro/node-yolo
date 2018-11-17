@@ -495,7 +495,7 @@ yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection_image **detect, 
  return yolo_ok;
 }
 
-yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, char *filename, float thresh, unsigned int percentageFramesToDrop)
+yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, char *filename, float thresh, unsigned int percentage_frames_to_drop)
 {
  unsigned long long start=unixTimeMilis();
  yolo_status status=yolo_check_before_process_filename(yolo, filename);
@@ -509,19 +509,19 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  cv::VideoCapture *capture;
 
  thread_image_queue_t image_queue;
-
  thread_common_t data_image_common;
  thread_get_frame_t data_get_image;
  thread_processing_image_t data_process_image;
 
  data_image_common.end=false;
  image_queue.queue=std::deque<queue_image_t>();
-
  image_queue.common=&data_image_common;
 
  data_get_image.image_queue=data_process_image.image_queue=&image_queue;
 
- data_process_image.yolo=yolo;
+ data_get_image.
+
+      data_process_image.yolo=yolo;
  data_process_image.thresh=thresh;
  data_process_image.yolo_detect=detect;
 
