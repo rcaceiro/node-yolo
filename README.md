@@ -1,6 +1,8 @@
 # node-yolo
-This Node.js C++ Addon came out from a computer engineering project, [VAPi](https://github.com/freakstatic/vapi-server).
-It allow you to use a state-of-the-art, real-time object detection system called [Yolo](https://pjreddie.com/darknet/yolo/).
+This Node.js C++ addon allow you to use a state-of-the-art, real-time object detection system called [Yolo](https://pjreddie.com/darknet/yolo/).
+<br>This addon came out from a computer engineering final project, [VAPi](https://github.com/freakstatic/vapi-server), guided by [Patrício Domingues](https://scholar.google.com/citations?user=LPwSQ2EAAAAJ&hl=en) at [Institute Polytechnic of Leiria](https://www.ipleiria.pt/).
+<br>The version 1.x.x was developed by [Rúben Caceiro](https://github.com/rcaceiro) and [Ricardo Maltez](https://github.com/freakstatic) during the course.
+<br>The version 2.x.x was sponsored by [Instituto de Telecomunicações](https://www.it.pt) developed by [Rúben Caceiro](https://github.com/rcaceiro) and guided by [Patrício Domingues](https://scholar.google.com/citations?user=LPwSQ2EAAAAJ&hl=en). 
 
 **Now this branch is in development mode. Now is in beta, the video classification functionality works but need alot of refinements.
   If you use this branch please be careful you have some instabilities and check for frequent updates.**
