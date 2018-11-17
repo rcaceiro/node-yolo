@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <cmath>
 
 void fill_detect(yolo_object *yolo, detection *network_detection, int network_detection_index, detect *yolo_detect)
 {
@@ -519,8 +520,6 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
 
  data_get_image.image_queue=data_process_image.image_queue=&image_queue;
 
- data_get_image.percentage_frames_to_drop=percentage_frames_to_drop;
-
  data_process_image.yolo=yolo;
  data_process_image.thresh=thresh;
  data_process_image.yolo_detect=detect;
@@ -558,6 +557,16 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
   return yolo_cannot_open_video_stream;
  }
  data_get_image.video=capture;
+ 
+ double temp_calc_number_frames_to_drop=(percentage_frames_to_drop/100.0)*capture->get(cv::CAP_PROP_FPS);
+ if(temp_calc_number_frames_to_drop<=0 && percentage_frames_to_drop != 0)
+ {
+  data_get_image.number_frames_to_drop=0;
+ }
+ else
+ {
+  data_get_image.number_frames_to_drop=static_cast<unsigned int>(floor(temp_calc_number_frames_to_drop));
+ }
 
  capture_image_thread=(pthread_t *)calloc(num_capture_image_threads, sizeof(pthread_t));
  if(capture_image_thread == nullptr)
