@@ -496,7 +496,7 @@ yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection_image **detect, 
  return yolo_ok;
 }
 
-yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, char *filename, float thresh, unsigned int percentage_frames_to_drop)
+yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, char *filename, float thresh, unsigned int fraction_frames_to_drop)
 {
  unsigned long long start=unixTimeMilis();
  yolo_status status=yolo_check_before_process_filename(yolo, filename);
@@ -557,16 +557,13 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
   return yolo_cannot_open_video_stream;
  }
  data_get_image.video=capture;
- 
- double temp_calc_number_frames_to_drop=(percentage_frames_to_drop/100.0)*capture->get(cv::CAP_PROP_FPS);
- if(temp_calc_number_frames_to_drop<=0 && percentage_frames_to_drop != 0)
+
+ double fps=capture->get(cv::CAP_PROP_FPS);
+ if(!fps)
  {
-  data_get_image.number_frames_to_drop=0;
+  return yolo_error_getting_fps;
  }
- else
- {
-  data_get_image.number_frames_to_drop=static_cast<unsigned int>(floor(temp_calc_number_frames_to_drop));
- }
+ data_get_image.number_frames_to_drop_simultaneously=(unsigned int)floor(fps/(fraction_frames_to_drop*fps));
 
  capture_image_thread=(pthread_t *)calloc(num_capture_image_threads, sizeof(pthread_t));
  if(capture_image_thread == nullptr)
