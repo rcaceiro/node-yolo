@@ -615,13 +615,13 @@ napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
   return nullptr;
  }
 
- int percentage_frames_to_drop=0;
+ double fraction_frames_to_drop=0;
  if(argc>2)
  {
-  status=get_int_value(env, args, 2, &percentage_frames_to_drop);
+  status=get_double_value(env, args, 2, &fraction_frames_to_drop);
   if(status != napi_ok)
   {
-   napi_throw_error(env, "05", "Cannot get percentage to drop frames value");
+   napi_throw_error(env, "05", "Cannot get fraction to drop frames value");
    return nullptr;
   }
  }
