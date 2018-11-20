@@ -26,7 +26,7 @@ if (process.argv[2] === undefined) {
 }
 else {
     if (process.argv[2] !== undefined) {
-        obj.detectVideo(process.argv[2], 0.5, 50)
+        obj.detectVideo(process.argv[2], 0.5, 1 / 3)
             .then((detections) => {
                 console.log(JSON.stringify(detections));
             })
