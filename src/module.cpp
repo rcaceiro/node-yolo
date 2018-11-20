@@ -390,7 +390,7 @@ void async_detect_video(napi_env env, void *data)
  if(holder->yolo->created)
  {
   holder->yolo->mutex_lock();
-  holder->yolo_stats=yolo_detect_video(holder->yolo->yolo, &holder->video_detection, holder->image_path, holder->thresh_value, (unsigned int)holder->percentage_frames_to_drop);
+  holder->yolo_stats=yolo_detect_video(holder->yolo->yolo, &holder->video_detection, holder->image_path, holder->thresh_value, holder->fraction_frames_to_drop);
   holder->yolo->mutex_unlock();
  }
  else
@@ -653,7 +653,7 @@ napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
  holder->thresh_value=(float)thresh;
  holder->yolo=yolo_obj;
  holder->resource=resource;
- holder->percentage_frames_to_drop=percentage_frames_to_drop;
+ holder->fraction_frames_to_drop=fraction_frames_to_drop;
 
  status=napi_create_async_work(env, resource, resource_name, async_detect_video, complete_async_detect, holder, &holder->work);
  assert(status == napi_ok);
