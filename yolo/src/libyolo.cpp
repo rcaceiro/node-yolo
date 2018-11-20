@@ -155,10 +155,12 @@ void *thread_capture(void *data)
   return nullptr;
  }
  auto *thread_data=(thread_get_frame_t *)data;
- cv::Mat mat;
 
  while(true)
  {
+  cv::Mat mat;
+  bool skip=false;
+
   if(!thread_data->video->isOpened())
   {
    thread_data->image_queue->common->end=true;
@@ -171,11 +173,42 @@ void *thread_capture(void *data)
   }
   unsigned long long int startTime=unixTimeMilis();
 
-  (*thread_data->video)>>mat;
-  queue_image.milisecond=thread_data->video->get(CV_CAP_PROP_POS_MSEC);
-  queue_image.frame_number=(long)thread_data->video->get(CV_CAP_PROP_POS_FRAMES);
+  if(!thread_data->video->grab())
+  {
+   thread_data->image_queue->common->end=true;
+  }
 
+  if(!thread_data->image_queue->common->end)
+  {
+   if(thread_data->number_frames_to_process)
+   {
+    if(thread_data->video->retrieve(mat))
+    {
+     --thread_data->number_frames_to_process;
+     queue_image.milisecond=thread_data->video->get(CV_CAP_PROP_POS_MSEC);
+     queue_image.frame_number=(long)thread_data->video->get(CV_CAP_PROP_POS_FRAMES);
+    }
+    else
+    {
+     thread_data->image_queue->common->end=true;
+    }
+   }
+   else
+   {
+    skip=true;
+    thread_data->number_frames_to_process=thread_data->number_frames_to_process_simultaneously;
+   }
+  }
   pthread_mutex_unlock(&thread_data->mutex);
+
+  if(thread_data->image_queue->common->end)
+  {
+   break;
+  }
+  if(skip)
+  {
+   continue;
+  }
 
   if(mat.empty())
   {
@@ -496,7 +529,7 @@ yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection_image **detect, 
  return yolo_ok;
 }
 
-yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, char *filename, float thresh, unsigned int fraction_frames_to_drop)
+yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, char *filename, float thresh, double fraction_frames_to_drop)
 {
  unsigned long long start=unixTimeMilis();
  yolo_status status=yolo_check_before_process_filename(yolo, filename);
@@ -504,7 +537,7 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  {
   return status;
  }
- const size_t num_capture_image_threads=2;
+ const size_t num_capture_image_threads=1;
  pthread_t *capture_image_thread;
  pthread_t process_image_thread;
  cv::VideoCapture *capture;
@@ -563,7 +596,11 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  {
   return yolo_error_getting_fps;
  }
- data_get_image.number_frames_to_drop_simultaneously=(unsigned int)floor(fps/(fraction_frames_to_drop*fps));
+ data_get_image.number_frames_to_process=data_get_image.number_frames_to_process_simultaneously=(unsigned int)floor(fps/(fraction_frames_to_drop*fps));
+ if(data_get_image.number_frames_to_process>0)
+ {
+  data_get_image.number_frames_to_process_simultaneously=--data_get_image.number_frames_to_process;
+ }
 
  capture_image_thread=(pthread_t *)calloc(num_capture_image_threads, sizeof(pthread_t));
  if(capture_image_thread == nullptr)
