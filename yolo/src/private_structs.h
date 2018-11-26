@@ -36,7 +36,7 @@ typedef struct
  cv::VideoCapture *video;
 
  unsigned int number_frames_to_process_simultaneously;
- unsigned int number_frames_to_process;
+ unsigned int number_frames_to_drop;
  unsigned long long int total_milis;
  unsigned long int number_of_samples;
  unsigned long int number_of_wait_push_image;
