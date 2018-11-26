@@ -553,7 +553,7 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  data_process_image.thresh=thresh;
  data_process_image.yolo_detect=detect;
 
- data_get_image.number_frames_to_drop=(unsigned int)floor((1/fraction_frames_to_process)-1);
+ data_get_image.number_frames_to_process_simultaneously=data_get_image.number_frames_to_drop=(unsigned int)floor((1/fraction_frames_to_process)-1);
 
  //TEMP////////////////////////////////////////////////////////////////
  data_get_image.total_milis=0;
