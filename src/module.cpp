@@ -390,7 +390,7 @@ void async_detect_video(napi_env env, void *data)
  if(holder->yolo->created)
  {
   holder->yolo->mutex_lock();
-  holder->yolo_stats=yolo_detect_video(holder->yolo->yolo, &holder->video_detection, holder->image_path, holder->thresh_value, holder->fraction_frames_to_drop);
+  holder->yolo_stats=yolo_detect_video(holder->yolo->yolo, &holder->video_detection, holder->image_path, holder->thresh_value, holder->fraction_frames_to_process);
   holder->yolo->mutex_unlock();
  }
  else
@@ -615,13 +615,13 @@ napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
   return nullptr;
  }
 
- double fraction_frames_to_drop=0;
+ double fraction_frames_to_process=1;
  if(argc>2)
  {
-  status=get_double_value(env, args, 2, &fraction_frames_to_drop);
+  status=get_double_value(env, args, 2, &fraction_frames_to_process);
   if(status != napi_ok)
   {
-   napi_throw_error(env, "05", "Cannot get fraction to drop frames value");
+   napi_throw_error(env, "05", "Cannot get fraction to process frames value");
    return nullptr;
   }
  }
@@ -653,7 +653,7 @@ napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
  holder->thresh_value=(float)thresh;
  holder->yolo=yolo_obj;
  holder->resource=resource;
- holder->fraction_frames_to_drop=fraction_frames_to_drop;
+ holder->fraction_frames_to_process=fraction_frames_to_process;
 
  status=napi_create_async_work(env, resource, resource_name, async_detect_video, complete_async_detect, holder, &holder->work);
  assert(status == napi_ok);
