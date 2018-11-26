@@ -537,7 +537,7 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  pthread_t *capture_image_thread;
  pthread_t process_image_thread;
  cv::VideoCapture *capture;
-
+ double totalFrames;
  thread_image_queue_t image_queue;
  thread_common_t data_image_common;
  thread_get_frame_t data_get_image;
@@ -588,7 +588,7 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
   return yolo_cannot_open_video_stream;
  }
  data_get_image.video=capture;
-
+ totalFrames=capture->get(cv::CAP_PROP_FRAME_COUNT);
  capture_image_thread=(pthread_t *)calloc(num_capture_image_threads, sizeof(pthread_t));
  if(capture_image_thread == nullptr)
  {
@@ -620,7 +620,7 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  pthread_mutex_destroy(&data_get_image.mutex);
  ///////////////////////////////////////////////////////////
 
- printf("Process video took %llu\n", unixTimeMilis()-start);
+ printf("Process video took %llu and has %f frames\n", unixTimeMilis()-start, totalFrames);
  printf("Process get frames took around %lf and the number of waits to push the image object was %lu\n", data_get_image.total_milis/(1.0f*data_get_image.number_of_samples), data_get_image.number_of_wait_push_image);
  printf("Process %lu images took around %lf and the number of waits to pop the image object was %lu\n", data_get_image.number_of_samples, data_process_image.total_milis/(1.0f*data_process_image.number_of_samples), data_process_image.number_of_wait_pop_get_image);
  return yolo_ok;
