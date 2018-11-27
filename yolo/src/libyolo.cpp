@@ -182,7 +182,7 @@ void *thread_capture(void *data)
    break;
   }
 
-  if(thread_data->number_frames_to_drop)
+  if(!thread_data->number_frames_to_drop)
   {
    if(!thread_data->video->retrieve(mat))
    {
@@ -190,14 +190,14 @@ void *thread_capture(void *data)
     pthread_mutex_unlock(&thread_data->mutex);
     break;
    }
-   --thread_data->number_frames_to_drop;
+   thread_data->number_frames_to_drop=thread_data->number_frames_to_process_simultaneously;
    queue_image.milisecond=thread_data->video->get(CV_CAP_PROP_POS_MSEC);
    queue_image.frame_number=(long)thread_data->video->get(CV_CAP_PROP_POS_FRAMES);
   }
   else
   {
    skip=true;
-   thread_data->number_frames_to_drop=thread_data->number_frames_to_process_simultaneously;
+   --thread_data->number_frames_to_drop;
   }
   pthread_mutex_unlock(&thread_data->mutex);
 
