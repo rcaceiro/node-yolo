@@ -91,7 +91,7 @@ You need to create two folder, cfg and data and put the files for each one. Like
 | **Field** | **Type** | **Description**
 |:----------|:---------|:-----------------------------------------------------
 | `className`   | `string` | name of the class of the object detected
-| `probability` | `double` | the higher probability that this className is correct
+| `probability` | `double` | the probability that this className is correct
 | `box`         | `box` | object that contains box info of the object
 
 #### box object
