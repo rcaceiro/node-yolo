@@ -77,7 +77,7 @@ You need to create two folder, cfg and data and put the files for each one. Like
 | **Field** | **Type** | **Description**
 |:----------|:---------|:-----------------------------------------------------
 | `frame` | `long/int64` | number of the frame
-| `milisecond` | `double` | the second that frame appear on video
+| `millisecond` | `double` | the millisecond that frame appear on video
 | `timeSpentForClassification` | `double` | time used to classifies one frame
 | `detections` | `array` | array of `detections` object, containing all detections 
 
