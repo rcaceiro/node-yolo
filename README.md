@@ -79,15 +79,15 @@ You need to create two folder, cfg and data and put the files for each one. Like
 | `frame` | `long/int64` | number of the frame
 | `millisecond` | `double` | the millisecond that frame appear on video
 | `timeSpentForClassification` | `double` | time used to classifies one frame
-| `detections` | `array` | array of `detections` object, containing all detections 
+| `detections` | `array` | array of `detection` object, containing all detections
 
 #### image detection object
 | **Field** | **Type** | **Description**
 |:----------|:---------|:-----------------------------------------------------
 | `timeSpentForClassification` | `double` | time used to classifies one image
-| `detections` | `array` | array of `detections` object, containing all detections 
+| `detections` | `array` | array of `detection` object, containing all detections
 
-#### detections object
+#### detection object
 | **Field** | **Type** | **Description**
 |:----------|:---------|:-----------------------------------------------------
 | `className`   | `string` | name of the class of the object detected
