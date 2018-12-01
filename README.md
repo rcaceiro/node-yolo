@@ -69,7 +69,9 @@ You need to create two folder, cfg and data and put the files for each one. Like
     │   └── yolov3.weights      # YoloV3 weights file
     └── ...
 
-**Note**: Our suggestion for better performance is to use [coco.data](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.data), [coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.names), [yolov3-spp.cfg](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3-spp.cfg) and [yolov3-spp.weights](https://pjreddie.com/media/files/yolov3-spp.weights).
+**Note 1**: Our suggestion for better accuracy use [coco.data](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.data), [coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.names), [yolov3-spp.cfg](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3-spp.cfg) and [yolov3-spp.weights](https://pjreddie.com/media/files/yolov3-spp.weights).
+**Note 2**: Our suggestion for faster detection use [coco.data](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.data), [coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.names), [yolov3-tiny.cfg](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3-tiny.cfg) and [yolov3-tiny.weights](https://pjreddie.com/media/files/yolov3-tiny.weights).
+**Note 3**: Our suggestion for best of two worlds use [coco.data](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.data), [coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.names), [yolov3.cfg](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3.cfg) and [yolov3.weights](https://pjreddie.com/media/files/yolov3.weights).
 
 #### video detection object
 | **Field** | **Type** | **Description**
