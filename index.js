@@ -42,7 +42,8 @@ if (process.argv[2] === undefined) {
             for (let file of files) {
                 obj.detectVideo(file, 0.5, 1)
                     .then((detections) => {
-                        console.log(file + " " + JSON.stringify(detections));
+                        //console.log(file + " " + JSON.stringify(detections));
+                        console.log(file + " done!");
                     })
                     .catch((error) => {
                         console.error(error);
