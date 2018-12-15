@@ -40,11 +40,11 @@ if (process.argv[2] === undefined) {
                 console.log(err);
             }
             for (let file of files) {
-                console.log(file);
-                obj.detectVideo(file, 0.5, 1)
+                console.log(process.argv[2] + file.name);
+                obj.detectVideo(process.argv[2] + file.name, 0.5, 1)
                     .then((detections) => {
                         //console.log(file + " " + JSON.stringify(detections));
-                        console.log(file + " done!");
+                        console.log(file.name + " done!");
                     })
                     .catch((error) => {
                         console.error(error);
