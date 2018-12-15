@@ -39,7 +39,9 @@ if (process.argv[2] === undefined) {
             if (err) {
                 console.log(err);
             }
-            for (let file of files) {
+            files.forEach((file) => {
+            });
+            {
                 console.log(file);
                 obj.detectVideo(file, 0.5, 1)
                     .then((detections) => {
