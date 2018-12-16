@@ -44,6 +44,7 @@ if (process.argv[2] === undefined) {
                 obj.detectVideo(process.argv[2] + file.name, 0.5, 1)
                     .then((detections) => {
                         //console.log(file + " " + JSON.stringify(detections));
+                        fs.unlinkSync(process.argv[2] + file.name)
                         console.log(file.name + " done!");
                     })
                     .catch((error) => {
