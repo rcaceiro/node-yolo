@@ -5,6 +5,7 @@ weights/
 *.a
 *.dylib
 *.o
+*.so
 darknet/cfg
 darknet/data
 darknet/examples
@@ -12,3 +13,4 @@ darknet/python
 cmake-build-debug/
 node_modules/
 data/
+build/
