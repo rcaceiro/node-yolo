@@ -2,8 +2,6 @@
 This Node.js C++ Addon came out from a computer engineering project, [VAPi](https://github.com/freakstatic/vapi-server).
 It allow you to use a state-of-the-art, real-time object detection system called [Yolo](https://pjreddie.com/darknet/yolo/).
 
-**Now this branch is in development mode. Now is in beta, the video classification functionality works but need alot of refinements.
-  If you use this branch please be careful you have some instabilities and check for frequent updates.**
 ### Pre-requirements
 * C/C++ Compiler (tested with gcc & g++)
 * nVidia graphic card (Only if you want to use GPU acceleration):
