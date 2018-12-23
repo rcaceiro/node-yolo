@@ -4,12 +4,8 @@
 - **y** represent, new backwards compatible functionality are introduced
 - **x** represent, any backwards incompatible changes are introduced, and/or a big bundle of bug fixes and new functionalities are introduced.
 
-## [v2.0.1](https://github.com/rcaceiro/node-yolo/tree/v2.0.0) (23-12-2018)
-[Full Changelog](https://github.com/rcaceiro/node-yolo/compare/v2.0.0...v2.0.1)
-**Fixed bugs:**
-- Fix when call yolo_status_decode, this method wasn't linked in libnodeyolo.
 
-## [v2.1.0](https://github.com/rcaceiro/node-yolo/tree/v2.0.0) (2018)
+## [v2.1.0](https://github.com/rcaceiro/node-yolo/tree/v2.0.0) (23-12-2018)
 [Full Changelog](https://github.com/rcaceiro/node-yolo/compare/v2.0.0...v2.1.0)
 
 **New Features**:
@@ -19,7 +15,7 @@
 **Implemented enhancements:**
 - now on reject the node-yolo no longer kill nodeJS.
 
-## [v2.0.1](https://github.com/rcaceiro/node-yolo/tree/v2.0.0) (2018)
+## [v2.0.1](https://github.com/rcaceiro/node-yolo/tree/v2.0.0) (23-12-2018)
 [Full Changelog](https://github.com/rcaceiro/node-yolo/compare/v2.0.0...v2.0.1)
 
 **Fixed bugs:**
