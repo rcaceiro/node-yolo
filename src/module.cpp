@@ -293,6 +293,16 @@ void reject(napi_env env, yolo_napi_status yolo_stats, data_holder *holder)
  napi_reject_deferred(env, holder->deferred, error);
 }
 
+void release_async_work(napi_env env, data_holder *holder)
+{
+ napi_async_work work=holder->work;
+
+ free(holder->image_path);
+ free(holder);
+
+ napi_delete_async_work(env, work);
+}
+
 void complete_async_detect(napi_env env, napi_status status, void *data)
 {
  auto *holder=static_cast<data_holder *>(data);
@@ -302,17 +312,21 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
  if(holder->yolo_stats != yolo_ok)
  {
   reject(env, yolo_napi_error_from_libyolo, holder);
+  release_async_work(env, holder);
+  return;
  }
 
  if(status != napi_ok)
  {
   reject(env, yolo_napi_unknow_error, holder);
+  release_async_work(env, holder);
   return;
  }
 
  if(holder->img_detection == nullptr && holder->video_detection == nullptr)
  {
   reject(env, yolo_napi_unknow_error, holder);
+  release_async_work(env, holder);
   return;
  }
 
@@ -359,12 +373,7 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
   yolo_detection_video_free(&holder->video_detection);
  }
 
- napi_async_work work=holder->work;
-
- free(holder->image_path);
- free(holder);
-
- napi_delete_async_work(env, work);
+ release_async_work(env, holder);
 }
 
 void async_detect_image(napi_env env, void *data)
@@ -593,9 +602,9 @@ napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
   return nullptr;
  }
 
- if(argc<2)
+ if(argc<1)
  {
-  napi_throw_error(env, "01", "You have to pass the path to image and thresh value as parameters");
+  napi_throw_error(env, "01", "You have to pass the path to image as parameters");
   return nullptr;
  }
 
@@ -608,11 +617,14 @@ napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
  }
 
  double thresh=0.5;
- status=get_double_value(env, args, 1, &thresh);
- if(status != napi_ok)
+ if(argc>1)
  {
-  napi_throw_error(env, "04", "Cannot get thresh value");
-  return nullptr;
+  status=get_double_value(env, args, 1, &thresh);
+  if(status != napi_ok)
+  {
+   napi_throw_error(env, "04", "Cannot get thresh value");
+   return nullptr;
+  }
  }
 
  double fraction_frames_to_process=1;
@@ -646,7 +658,11 @@ napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
  }
 
  status=napi_create_promise(env, &deferred, &promise);
- assert(status == napi_ok);
+ if(status != napi_ok)
+ {
+  napi_throw_error(env, "06", "Cannot create promise");
+  return nullptr;
+ }
 
  holder->deferred=deferred;
  holder->image_path=video_path;
