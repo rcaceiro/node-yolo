@@ -4,8 +4,6 @@ This Node.js C++ addon allow you to use a state-of-the-art, real-time object det
 <br>The version 1.x.x was developed by [Rúben Caceiro](https://github.com/rcaceiro) and [Ricardo Maltez](https://github.com/freakstatic) during the final project.
 <br>The version 2.x.x was sponsored by [Instituto de Telecomunicações](https://www.it.pt) developed by [Rúben Caceiro](https://github.com/rcaceiro) and guided by [Patrício Domingues](https://scholar.google.com/citations?user=LPwSQ2EAAAAJ&hl=en). 
 
-**Now this branch is in development mode. Now is in beta, the video classification functionality works but need alot of refinements.
-  If you use this branch please be careful you have some instabilities and check for frequent updates.**
 ### Pre-requirements
 * C/C++ Compiler (tested with gcc & g++)
 * nVidia graphic card (Only if you want to use GPU acceleration):
@@ -34,29 +32,34 @@ npm i @vapi/node-yolo --save
 
 ```javascript
 const Yolo = require('@vapi/node-yolo');
-const detector = new Yolo("darknet-configs", "cfg/coco.data", "cfg/yolov3.cfg", "yolov3.weights");
-try{
-	detector.detectImage(path)
-         .then(detections => {
-            // here you receive the detections
-         })
-         .catch(error => {
-           // here you can handle the errors. Ex: Out of memory
+const detector = new Yolo("darknet_configs", "cfg/coco.data", "cfg/yolov3.cfg", "yolov3.weights");
+detector.detectImage(path,threshold,frames_to_process)
+        .then(detections =>
+        {
+         // here you receive the detections
+        })
+        .catch(error =>
+        {
+         // here you can handle the errors. Ex: Out of memory
         });
 	
-	detector.detectVideo(path)
-              .then(detections => {
-                 // here you receive the detections
-              })
-              .catch(error => {
-                // here you can handle the errors. Ex: Out of memory
-             });
-}
-catch(error){
-    console.log('Catch: ' + error);
-}
+detector.detectVideo(path,threshold,frames_to_process)
+        .then(detections =>
+        {
+         // here you receive the detections
+        })
+        .catch(error =>
+        {
+         // here you can handle the errors. Ex: Out of memory
+        });
 ```
-**darknet-configs** is a folder where you should put the Yolo [weights](https://pjreddie.com/darknet/yolo/), [cfg](https://github.com/pjreddie/darknet/tree/master/cfg) and [data files](https://github.com/pjreddie/darknet/tree/master/data). 
+**path**, required, represents the path to the file
+
+**threshold**, not required, default behaviour is 0.5, represents the threshold to yolo filter the detections
+
+**frames_to_process**, not required, default behaviour is 1/1, represents the number of frames that developer wants to process, this means 1/3 process 1 frame for each 3.
+
+**darknet_configs** is a folder where you should put the Yolo [weights](https://pjreddie.com/darknet/yolo/), [cfg](https://github.com/pjreddie/darknet/tree/master/cfg) and [data files](https://github.com/pjreddie/darknet/tree/master/data).
 You need to create two folder, cfg and data and put the files for each one. Like this:<br/>
 
     .
