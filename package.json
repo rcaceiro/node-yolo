@@ -24,7 +24,7 @@
  "main":"index.js",
  "gypfile":true,
  "scripts":{
-  "preinstall":"make clean_all && make -j 2 && make clean && node-gyp configure && node-gyp build"
+  "preinstall":"make clean_all && make -j 2 && make clean && node-gyp configure build"
  },
  "dependencies":{
  },
