@@ -36,6 +36,7 @@ typedef struct
  Yolo *yolo;
  char *image_path;
  float thresh_value;
+ double fraction_frames_to_process;
  napi_deferred deferred;
  napi_async_work work;
  napi_value resource;

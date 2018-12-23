@@ -1,6 +1,6 @@
 {
  "name":"@vapi/node-yolo",
- "version":"2.0.1",
+ "version":"2.1.0",
  "description":"Node.js interface for Yolo/Darknet",
  "keywords":[
   "yolo",
@@ -24,7 +24,7 @@
  "main":"index.js",
  "gypfile":true,
  "scripts":{
-  "preinstall":"make clean_all && make -j 2 && make clean && node-gyp configure && node-gyp build"
+  "preinstall":"make clean_all && make -j 2 && make clean && node-gyp configure build"
  },
  "dependencies":{
  },

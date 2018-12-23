@@ -36,7 +36,7 @@ typedef enum
  yolo_image_file_is_corrupted,
 
  yolo_video_cannot_alloc_base_structure,
- yolo_cannot_open_video_stream,
+ yolo_cannot_open_video_stream, yolo_error_getting_fps,
 
  yolo_unknow_error
 }yolo_status;

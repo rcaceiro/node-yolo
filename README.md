@@ -1,6 +1,8 @@
 # node-yolo
-This Node.js C++ Addon came out from a computer engineering project, [VAPi](https://github.com/freakstatic/vapi-server).
-It allow you to use a state-of-the-art, real-time object detection system called [Yolo](https://pjreddie.com/darknet/yolo/).
+This Node.js C++ addon allow you to use a state-of-the-art, real-time object detection system called [Yolo](https://pjreddie.com/darknet/yolo/).
+<br>This addon came out from a computer engineering final project, [VAPi](https://github.com/freakstatic/vapi-server), guided by [Patrício Domingues](https://scholar.google.com/citations?user=LPwSQ2EAAAAJ&hl=en) at [Institute Polytechnic of Leiria](https://www.ipleiria.pt/).
+<br>The version 1.x.x was developed by [Rúben Caceiro](https://github.com/rcaceiro) and [Ricardo Maltez](https://github.com/freakstatic) during the final project.
+<br>The version 2.x.x was sponsored by [Instituto de Telecomunicações](https://www.it.pt) developed by [Rúben Caceiro](https://github.com/rcaceiro) and guided by [Patrício Domingues](https://scholar.google.com/citations?user=LPwSQ2EAAAAJ&hl=en). 
 
 ### Pre-requirements
 * C/C++ Compiler (tested with gcc & g++)
@@ -30,29 +32,34 @@ npm i @vapi/node-yolo --save
 
 ```javascript
 const Yolo = require('@vapi/node-yolo');
-const detector = new Yolo("darknet-configs", "cfg/coco.data", "cfg/yolov3.cfg", "yolov3.weights");
-try{
-	detector.detectImage(path)
-         .then(detections => {
-            // here you receive the detections
-         })
-         .catch(error => {
-           // here you can handle the errors. Ex: Out of memory
+const detector = new Yolo("darknet_configs", "cfg/coco.data", "cfg/yolov3.cfg", "yolov3.weights");
+detector.detectImage(path,threshold,frames_to_process)
+        .then(detections =>
+        {
+         // here you receive the detections
+        })
+        .catch(error =>
+        {
+         // here you can handle the errors. Ex: Out of memory
         });
 	
-	detector.detectVideo(path)
-              .then(detections => {
-                 // here you receive the detections
-              })
-              .catch(error => {
-                // here you can handle the errors. Ex: Out of memory
-             });
-}
-catch(error){
-    console.log('Catch: ' + error);
-}
+detector.detectVideo(path,threshold,frames_to_process)
+        .then(detections =>
+        {
+         // here you receive the detections
+        })
+        .catch(error =>
+        {
+         // here you can handle the errors. Ex: Out of memory
+        });
 ```
-**darknet-configs** is a folder where you should put the Yolo [weights](https://pjreddie.com/darknet/yolo/), [cfg](https://github.com/pjreddie/darknet/tree/master/cfg) and [data files](https://github.com/pjreddie/darknet/tree/master/data). 
+**path**, required, represents the path to the file
+
+**threshold**, not required, default behaviour is 0.5, represents the threshold to yolo filter the detections
+
+**frames_to_process**, not required, default behaviour is 1/1, represents the number of frames that developer wants to process, this means 1/3 process 1 frame for each 3.
+
+**darknet_configs** is a folder where you should put the Yolo [weights](https://pjreddie.com/darknet/yolo/), [cfg](https://github.com/pjreddie/darknet/tree/master/cfg) and [data files](https://github.com/pjreddie/darknet/tree/master/data).
 You need to create two folder, cfg and data and put the files for each one. Like this:<br/>
 
     .
@@ -65,27 +72,29 @@ You need to create two folder, cfg and data and put the files for each one. Like
     │   └── yolov3.weights      # YoloV3 weights file
     └── ...
 
-**Note**: Our suggestion for better performance is to use [coco.data](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.data), [coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.names), [yolov3-spp.cfg](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3-spp.cfg) and [yolov3-spp.weights](https://pjreddie.com/media/files/yolov3-spp.weights).
+**Note 1**: Our suggestion for better accuracy use [coco.data](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.data), [coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.names), [yolov3-spp.cfg](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3-spp.cfg) and [yolov3-spp.weights](https://pjreddie.com/media/files/yolov3-spp.weights).
+<br>**Note 2**: Our suggestion for faster detection use [coco.data](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.data), [coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.names), [yolov3-tiny.cfg](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3-tiny.cfg) and [yolov3-tiny.weights](https://pjreddie.com/media/files/yolov3-tiny.weights).
+<br>**Note 3**: Our suggestion for best of two worlds use [coco.data](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.data), [coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.names), [yolov3.cfg](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3.cfg) and [yolov3.weights](https://pjreddie.com/media/files/yolov3.weights).
 
 #### video detection object
 | **Field** | **Type** | **Description**
 |:----------|:---------|:-----------------------------------------------------
 | `frame` | `long/int64` | number of the frame
-| `milisecond` | `double` | the second that frame appear on video
+| `millisecond` | `double` | the millisecond that frame appear on video
 | `timeSpentForClassification` | `double` | time used to classifies one frame
-| `detections` | `array` | array of `detections` object, containing all detections 
+| `detections` | `array` | array of `detection` object, containing all detections
 
 #### image detection object
 | **Field** | **Type** | **Description**
 |:----------|:---------|:-----------------------------------------------------
 | `timeSpentForClassification` | `double` | time used to classifies one image
-| `detections` | `array` | array of `detections` object, containing all detections 
+| `detections` | `array` | array of `detection` object, containing all detections
 
-#### detections object
+#### detection object
 | **Field** | **Type** | **Description**
 |:----------|:---------|:-----------------------------------------------------
 | `className`   | `string` | name of the class of the object detected
-| `probability` | `double` | the higher probability that this className is correct
+| `probability` | `double` | the probability that this className is correct
 | `box`         | `box` | object that contains box info of the object
 
 #### box object

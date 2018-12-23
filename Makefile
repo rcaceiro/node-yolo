@@ -47,6 +47,11 @@ endif
 
 SLIB_DIR=$(addprefix yolo/, $(SLIB))
 
+ROOT=
+#ifeq ($(shell id -u), 0)
+#     ROOT=sudo
+#endif
+
 OBJDIR=./obj/
 VPATH=./darknet/src/:./yolo/src/:./stack/
 
@@ -106,25 +111,25 @@ all: obj $(SLIB_DIR) $(ALIB_DIR)
 #all: obj  results $(SLIB) $(ALIB) $(EXEC)
 
 $(EXEC): $(EXECOBJ) $(ALIB)
-	$(CC) $(COMMON) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(ALIB)
+	$(ROOT) $(CC) $(COMMON) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(ALIB)
 
 $(ALIB_DIR): $(OBJS)
-	$(AR) $(ARFLAGS) $@ $^
+	$(ROOT) $(AR) $(ARFLAGS) $@ $^
 
 $(SLIB_DIR): $(OBJS)
-	$(CC) $(CFLAGS) -shared $^ -o $@ $(LDFLAGS)
+	$(ROOT) $(CC) $(CFLAGS) -shared $^ -o $@ $(LDFLAGS)
 
 $(OBJDIR)%.o: %.cpp $(DEPS)
-	$(CPP) $(COMMON) $(CFLAGS) -std=c++17 -c $< -o $@
+	$(ROOT) $(CPP) $(COMMON) $(CFLAGS) -std=c++17 -c $< -o $@
 
 $(OBJDIR)%.o: %.c $(DEPS)
-	$(CC) $(COMMON) $(CFLAGS) -c $< -o $@
+	$(ROOT) $(CC) $(COMMON) $(CFLAGS) -c $< -o $@
 
 $(OBJDIR)%.o: %.cu $(DEPS)
-	$(NVCC) $(ARCH) $(COMMON) --compiler-options "$(CFLAGS)" -c $< -o $@
+	$(ROOT) $(NVCC) $(ARCH) $(COMMON) --compiler-options "$(CFLAGS)" -c $< -o $@
 
 obj:
-	mkdir -p obj
+	$(ROOT) mkdir -p obj
 backup:
 	mkdir -p backup
 results:
@@ -133,7 +138,7 @@ results:
 .PHONY: clean
 
 clean_all: clean
-	rm -rf $(SLIB_DIR) $(ALIB_DIR)
+	$(ROOT) rm -rf $(SLIB_DIR) $(ALIB_DIR)
 
 clean:
-	rm -rf obj
+	$(ROOT) rm -rf obj

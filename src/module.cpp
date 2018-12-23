@@ -52,6 +52,26 @@ napi_status get_double_value(napi_env env, napi_value args[], size_t index, doub
  return napi_ok;
 }
 
+napi_status get_int_value(napi_env env, napi_value args[], size_t index, int *value)
+{
+ napi_status status;
+ napi_valuetype value_type;
+ status=napi_typeof(env, args[index], &value_type);
+ if(status != napi_ok)
+ {
+  return napi_invalid_arg;
+ }
+
+ if(value_type != napi_number)
+ {
+  return napi_number_expected;
+ }
+
+ status=napi_get_value_int32(env, args[index], value);
+ assert(status == napi_ok);
+ return napi_ok;
+}
+
 yolo_napi_status load_box_object(napi_env env, box img_box, napi_value jsbox)
 {
  napi_status status;
@@ -273,6 +293,16 @@ void reject(napi_env env, yolo_napi_status yolo_stats, data_holder *holder)
  napi_reject_deferred(env, holder->deferred, error);
 }
 
+void release_async_work(napi_env env, data_holder *holder)
+{
+ napi_async_work work=holder->work;
+
+ free(holder->image_path);
+ free(holder);
+
+ napi_delete_async_work(env, work);
+}
+
 void complete_async_detect(napi_env env, napi_status status, void *data)
 {
  auto *holder=static_cast<data_holder *>(data);
@@ -282,17 +312,21 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
  if(holder->yolo_stats != yolo_ok)
  {
   reject(env, yolo_napi_error_from_libyolo, holder);
+  release_async_work(env, holder);
+  return;
  }
 
  if(status != napi_ok)
  {
   reject(env, yolo_napi_unknow_error, holder);
+  release_async_work(env, holder);
   return;
  }
 
  if(holder->img_detection == nullptr && holder->video_detection == nullptr)
  {
   reject(env, yolo_napi_unknow_error, holder);
+  release_async_work(env, holder);
   return;
  }
 
@@ -339,12 +373,7 @@ void complete_async_detect(napi_env env, napi_status status, void *data)
   yolo_detection_video_free(&holder->video_detection);
  }
 
- napi_async_work work=holder->work;
-
- free(holder->image_path);
- free(holder);
-
- napi_delete_async_work(env, work);
+ release_async_work(env, holder);
 }
 
 void async_detect_image(napi_env env, void *data)
@@ -370,7 +399,7 @@ void async_detect_video(napi_env env, void *data)
  if(holder->yolo->created)
  {
   holder->yolo->mutex_lock();
-  holder->yolo_stats=yolo_detect_video(holder->yolo->yolo, &holder->video_detection, holder->image_path, holder->thresh_value);
+  holder->yolo_stats=yolo_detect_video(holder->yolo->yolo, &holder->video_detection, holder->image_path, holder->thresh_value, holder->fraction_frames_to_process);
   holder->yolo->mutex_unlock();
  }
  else
@@ -563,8 +592,8 @@ napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
  napi_deferred deferred;
  napi_value promise;
  napi_value jsthis;
- size_t argc=2;
- napi_value args[2];
+ size_t argc=3;
+ napi_value args[3];
 
  status=napi_get_cb_info(env, info, &argc, args, &jsthis, nullptr);
  if(status != napi_ok)
@@ -573,9 +602,9 @@ napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
   return nullptr;
  }
 
- if(argc<2)
+ if(argc<1)
  {
-  napi_throw_error(env, "01", "You have to pass the path to image and thresh value as parameters");
+  napi_throw_error(env, "01", "You have to pass the path to image as parameters");
   return nullptr;
  }
 
@@ -588,11 +617,25 @@ napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
  }
 
  double thresh=0.5;
- status=get_double_value(env, args, 1, &thresh);
- if(status != napi_ok)
+ if(argc>1)
  {
-  napi_throw_error(env, "04", "Cannot get thresh value");
-  return nullptr;
+  status=get_double_value(env, args, 1, &thresh);
+  if(status != napi_ok)
+  {
+   napi_throw_error(env, "04", "Cannot get thresh value");
+   return nullptr;
+  }
+ }
+
+ double fraction_frames_to_process=1;
+ if(argc>2)
+ {
+  status=get_double_value(env, args, 2, &fraction_frames_to_process);
+  if(status != napi_ok)
+  {
+   napi_throw_error(env, "05", "Cannot get fraction to process frames value");
+   return nullptr;
+  }
  }
 
  void *obj=nullptr;
@@ -615,13 +658,18 @@ napi_value Yolo::DetectVideo(napi_env env, napi_callback_info info)
  }
 
  status=napi_create_promise(env, &deferred, &promise);
- assert(status == napi_ok);
+ if(status != napi_ok)
+ {
+  napi_throw_error(env, "06", "Cannot create promise");
+  return nullptr;
+ }
 
  holder->deferred=deferred;
  holder->image_path=video_path;
  holder->thresh_value=(float)thresh;
  holder->yolo=yolo_obj;
  holder->resource=resource;
+ holder->fraction_frames_to_process=fraction_frames_to_process;
 
  status=napi_create_async_work(env, resource, resource_name, async_detect_video, complete_async_detect, holder, &holder->work);
  assert(status == napi_ok);

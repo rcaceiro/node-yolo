@@ -9,7 +9,26 @@
 **Fixed bugs:**
 - Fix when call yolo_status_decode, this method wasn't linked in libnodeyolo.
 
-## [v2.0.0](https://github.com/rcaceiro/node-yolo/tree/v2.0.0) (2018)
+## [v2.1.0](https://github.com/rcaceiro/node-yolo/tree/v2.0.0) (2018)
+[Full Changelog](https://github.com/rcaceiro/node-yolo/compare/v2.0.0...v2.1.0)
+
+**New Features**:
+- node-yolo now can process only x number of frames. 1/3 means process 1 frames for each 3, the default behaviour is process every frame.
+- node-yolo now allow the developer can specify the threshold, the default behavior is 0.5.
+
+**Implemented enhancements:**
+- now on reject the node-yolo no longer kill nodeJS.
+
+## [v2.0.1](https://github.com/rcaceiro/node-yolo/tree/v2.0.0) (2018)
+[Full Changelog](https://github.com/rcaceiro/node-yolo/compare/v2.0.0...v2.0.1)
+
+**Fixed bugs:**
+- Small fix then yolo_status_decode is called, it wasn't linked on libyolo
+
+**Closed issues:**
+Detect only first object from same class [\#4](https://github.com/rcaceiro/node-yolo/issues/4)
+
+## [v2.0.0](https://github.com/rcaceiro/node-yolo/tree/v2.0.0) (15-11-2018)
 [Full Changelog](https://github.com/rcaceiro/node-yolo/compare/previous_to_v2.0.0...v2.0.0)
 
 **New Features**:
