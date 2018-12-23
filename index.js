@@ -14,7 +14,8 @@ if (fs.existsSync(__dirname + '/build/Debug/nodeyolo.node')) {
 let obj = new yolo_addon("./darknet", "./cfg/coco.data", "./cfg/yolov3-spp.cfg", "../weights/yolov3-spp.weights");
 
 if (process.argv[2] === undefined) {
-    obj.detectImage("./darknet/data/kite.jpg", 0.55)
+    //obj.detectImage("./darknet/data/kite.jpg", 0.55)
+    obj.detectImage("/home/rcaceiro/SynologyDrive/IPLeiria/research_grant/node-yolo/data/015-TSmith2-sec-crop-1-300x300.jpg", 0.55)
         .then((detections) => {
             console.log(JSON.stringify(detections));
         })
