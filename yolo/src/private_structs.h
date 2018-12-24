@@ -37,9 +37,6 @@ typedef struct
 
  unsigned int number_frames_to_process_simultaneously;
  unsigned int number_frames_to_drop;
- unsigned long long int total_milis;
- unsigned long int number_of_samples;
- unsigned long int number_of_wait_push_image;
  pthread_mutex_t mutex;
 }thread_get_frame_t;
 
@@ -50,10 +47,6 @@ typedef struct
  yolo_object *yolo;
  float thresh;
  yolo_detection_video **yolo_detect;
-
- unsigned long long int total_milis;
- unsigned long int number_of_samples;
- unsigned long int number_of_wait_pop_get_image;
 }thread_processing_image_t;
 
 #endif //NODE_YOLO_PRIVATE_STRUCTS_H
