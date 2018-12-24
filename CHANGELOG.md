@@ -4,11 +4,12 @@
 - **y** represent, new backwards compatible functionality are introduced
 - **x** represent, any backwards incompatible changes are introduced, and/or a big bundle of bug fixes and new functionalities are introduced.
 
-## [v2.1.2](https://github.com/rcaceiro/node-yolo/tree/v2.1.2) (24-12-2018)
-[Full Changelog](https://github.com/rcaceiro/node-yolo/compare/v2.1.1...v2.1.2)
+## [v2.1.3](https://github.com/rcaceiro/node-yolo/tree/v2.1.3) (24-12-2018)
+[Full Changelog](https://github.com/rcaceiro/node-yolo/compare/v2.1.1...v2.1.3)
 
 **Fixed bugs:**
 - Fix a bug then make with sudo, the which not run on sudo.
+- Support to nvcc when run make with sudo
 
 ## [v2.1.1](https://github.com/rcaceiro/node-yolo/tree/v2.1.1) (24-12-2018)
 [Full Changelog](https://github.com/rcaceiro/node-yolo/compare/v2.1.0...v2.1.1)
