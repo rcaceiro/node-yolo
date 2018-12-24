@@ -4,8 +4,9 @@ OPENCV=1
 OPENMP=0
 DEBUG=0
 
-NVCC_RESULT := $(shell which nvcc 2> /dev/null)
+NVCC_RESULT := $(shell find /usr -iname "nvcc" 2> /dev/null)
 NVCC_TEST := $(notdir $(NVCC_RESULT))
+
 ifeq ($(NVCC_TEST),nvcc)
 	GPU=1
 	CUDNN=1
