@@ -4,8 +4,13 @@
 - **y** represent, new backwards compatible functionality are introduced
 - **x** represent, any backwards incompatible changes are introduced, and/or a big bundle of bug fixes and new functionalities are introduced.
 
+## [v2.1.1](https://github.com/rcaceiro/node-yolo/tree/v2.1.1) (23-12-2018)
+[Full Changelog](https://github.com/rcaceiro/node-yolo/compare/v2.1.0...v2.1.1)
 
-## [v2.1.0](https://github.com/rcaceiro/node-yolo/tree/v2.0.0) (23-12-2018)
+**Fixed bugs:**
+- Removed some extra code that allow gather timings.
+
+## [v2.1.0](https://github.com/rcaceiro/node-yolo/tree/v2.1.0) (23-12-2018)
 [Full Changelog](https://github.com/rcaceiro/node-yolo/compare/v2.0.0...v2.1.0)
 
 **New Features**:
@@ -15,7 +20,7 @@
 **Implemented enhancements:**
 - now on reject the node-yolo no longer kill nodeJS.
 
-## [v2.0.1](https://github.com/rcaceiro/node-yolo/tree/v2.0.0) (23-12-2018)
+## [v2.0.1](https://github.com/rcaceiro/node-yolo/tree/v2.0.1) (23-12-2018)
 [Full Changelog](https://github.com/rcaceiro/node-yolo/compare/v2.0.0...v2.0.1)
 
 **Fixed bugs:**
