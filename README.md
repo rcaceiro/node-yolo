@@ -63,7 +63,7 @@ detector.detectVideo(path,threshold,frames_to_process)
 You need to create two folder, cfg and data and put the files for each one. Like this:<br/>
 
     .
-    ├── darknet-configs         # The folder for the Yolo weight, cfg and data files
+    ├── darknet_configs         # The folder for the Yolo weight, cfg and data files
     │   ├── cfg                 # cfg folder
     |          |── coco.data
     |          |── yolov3.cfg
