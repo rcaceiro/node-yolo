@@ -131,7 +131,7 @@ image libyolo_ipl_to_image(IplImage *src)
 
 image libyolo_mat_to_image(cv::Mat &m)
 {
- IplImage ipl=m;
+ IplImage ipl=cvIplImage(m);
  image im=libyolo_ipl_to_image(&ipl);
  rgbgr_image(im);
  return im;
