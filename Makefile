@@ -9,7 +9,6 @@ NVCC_TEST := $(notdir $(NVCC))
 
 ifeq ($(NVCC_TEST),nvcc)
 	GPU=1
-	CUDNN=1
 endif
 
 ARCH= -gencode arch=compute_30,code=sm_30 \
